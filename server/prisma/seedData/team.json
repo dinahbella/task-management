@@ -1,0 +1,27 @@
+[
+  {
+    "teamName": "Blog website",
+    "productOwnerUserId": 11,
+    "projectManagerUserId": 2
+  },
+  {
+    "teamName": "Management website",
+    "productOwnerUserId": 13,
+    "projectManagerUserId": 4
+  },
+  {
+    "teamName": "Workspace website",
+    "productOwnerUserId": 15,
+    "projectManagerUserId": 6
+  },
+  {
+    "teamName": "Inkvision website",
+    "productOwnerUserId": 17,
+    "projectManagerUserId": 8
+  },
+  {
+    "teamName": "Job website",
+    "productOwnerUserId": 19,
+    "projectManagerUserId": 10
+  }
+]
