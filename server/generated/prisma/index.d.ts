@@ -111,53 +111,6 @@ export class PrismaClient<
   $use(cb: Prisma.Middleware): void
 
 /**
-   * Executes a prepared raw query and returns the number of affected rows.
-   * @example
-   * ```
-   * const result = await prisma.$executeRaw`UPDATE User SET cool = ${true} WHERE email = ${'user@email.com'};`
-   * ```
-   *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $executeRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<number>;
-
-  /**
-   * Executes a raw query and returns the number of affected rows.
-   * Susceptible to SQL injections, see documentation.
-   * @example
-   * ```
-   * const result = await prisma.$executeRawUnsafe('UPDATE User SET cool = $1 WHERE email = $2 ;', true, 'user@email.com')
-   * ```
-   *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $executeRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<number>;
-
-  /**
-   * Performs a prepared raw query and returns the `SELECT` data.
-   * @example
-   * ```
-   * const result = await prisma.$queryRaw`SELECT * FROM User WHERE id = ${1} OR email = ${'user@email.com'};`
-   * ```
-   *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: any[]): Prisma.PrismaPromise<T>;
-
-  /**
-   * Performs a raw query and returns the `SELECT` data.
-   * Susceptible to SQL injections, see documentation.
-   * @example
-   * ```
-   * const result = await prisma.$queryRawUnsafe('SELECT * FROM User WHERE id = $1 OR email = $2;', 1, 'user@email.com')
-   * ```
-   *
-   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
-   */
-  $queryRawUnsafe<T = unknown>(query: string, ...values: any[]): Prisma.PrismaPromise<T>;
-
-
-  /**
    * Allows the running of a sequence of read/write operations that are guaranteed to either succeed or fail as a whole.
    * @example
    * ```
@@ -170,10 +123,24 @@ export class PrismaClient<
    * 
    * Read more in our [docs](https://www.prisma.io/docs/concepts/components/prisma-client/transactions).
    */
-  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
+  $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P]): $Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 
-  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number, isolationLevel?: Prisma.TransactionIsolationLevel }): $Utils.JsPromise<R>
+  $transaction<R>(fn: (prisma: Omit<PrismaClient, runtime.ITXClientDenyList>) => $Utils.JsPromise<R>, options?: { maxWait?: number, timeout?: number }): $Utils.JsPromise<R>
 
+  /**
+   * Executes a raw MongoDB command and returns the result of it.
+   * @example
+   * ```
+   * const user = await prisma.$runCommandRaw({
+   *   aggregate: 'User',
+   *   pipeline: [{ $match: { name: 'Bob' } }, { $project: { email: true, _id: false } }],
+   *   explain: false,
+   * })
+   * ```
+   * 
+   * Read more in our [docs](https://www.prisma.io/docs/reference/tools-and-interfaces/prisma-client/raw-database-access).
+   */
+  $runCommandRaw(command: Prisma.InputJsonObject): Prisma.PrismaPromise<Prisma.JsonObject>
 
   $extends: $Extensions.ExtendsHook<"extends", Prisma.TypeMapCb<ClientOptions>, ExtArgs, $Utils.Call<Prisma.TypeMapCb<ClientOptions>, {
     extArgs: ExtArgs
@@ -725,7 +692,7 @@ export namespace Prisma {
     }
     meta: {
       modelProps: "user" | "team" | "project" | "projectTeam" | "task" | "taskAssignment" | "attachment" | "comment"
-      txIsolationLevel: Prisma.TransactionIsolationLevel
+      txIsolationLevel: never
     }
     model: {
       User: {
@@ -760,10 +727,6 @@ export namespace Prisma {
             args: Prisma.UserCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.UserCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
-          }
           delete: {
             args: Prisma.UserDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$UserPayload>
@@ -780,10 +743,6 @@ export namespace Prisma {
             args: Prisma.UserUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
-          }
           upsert: {
             args: Prisma.UserUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$UserPayload>
@@ -795,6 +754,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.UserGroupByArgs<ExtArgs>
             result: $Utils.Optional<UserGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.UserFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.UserAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.UserCountArgs<ExtArgs>
@@ -834,10 +801,6 @@ export namespace Prisma {
             args: Prisma.TeamCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.TeamCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TeamPayload>[]
-          }
           delete: {
             args: Prisma.TeamDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TeamPayload>
@@ -854,10 +817,6 @@ export namespace Prisma {
             args: Prisma.TeamUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.TeamUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TeamPayload>[]
-          }
           upsert: {
             args: Prisma.TeamUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TeamPayload>
@@ -869,6 +828,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.TeamGroupByArgs<ExtArgs>
             result: $Utils.Optional<TeamGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.TeamFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.TeamAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.TeamCountArgs<ExtArgs>
@@ -908,10 +875,6 @@ export namespace Prisma {
             args: Prisma.ProjectCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.ProjectCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>[]
-          }
           delete: {
             args: Prisma.ProjectDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
@@ -928,10 +891,6 @@ export namespace Prisma {
             args: Prisma.ProjectUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.ProjectUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectPayload>[]
-          }
           upsert: {
             args: Prisma.ProjectUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ProjectPayload>
@@ -943,6 +902,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.ProjectGroupByArgs<ExtArgs>
             result: $Utils.Optional<ProjectGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.ProjectFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.ProjectAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.ProjectCountArgs<ExtArgs>
@@ -982,10 +949,6 @@ export namespace Prisma {
             args: Prisma.ProjectTeamCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.ProjectTeamCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectTeamPayload>[]
-          }
           delete: {
             args: Prisma.ProjectTeamDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ProjectTeamPayload>
@@ -1002,10 +965,6 @@ export namespace Prisma {
             args: Prisma.ProjectTeamUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.ProjectTeamUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProjectTeamPayload>[]
-          }
           upsert: {
             args: Prisma.ProjectTeamUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ProjectTeamPayload>
@@ -1017,6 +976,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.ProjectTeamGroupByArgs<ExtArgs>
             result: $Utils.Optional<ProjectTeamGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.ProjectTeamFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.ProjectTeamAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.ProjectTeamCountArgs<ExtArgs>
@@ -1056,10 +1023,6 @@ export namespace Prisma {
             args: Prisma.TaskCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.TaskCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskPayload>[]
-          }
           delete: {
             args: Prisma.TaskDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TaskPayload>
@@ -1076,10 +1039,6 @@ export namespace Prisma {
             args: Prisma.TaskUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.TaskUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskPayload>[]
-          }
           upsert: {
             args: Prisma.TaskUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TaskPayload>
@@ -1091,6 +1050,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.TaskGroupByArgs<ExtArgs>
             result: $Utils.Optional<TaskGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.TaskFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.TaskAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.TaskCountArgs<ExtArgs>
@@ -1130,10 +1097,6 @@ export namespace Prisma {
             args: Prisma.TaskAssignmentCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.TaskAssignmentCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskAssignmentPayload>[]
-          }
           delete: {
             args: Prisma.TaskAssignmentDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TaskAssignmentPayload>
@@ -1150,10 +1113,6 @@ export namespace Prisma {
             args: Prisma.TaskAssignmentUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.TaskAssignmentUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TaskAssignmentPayload>[]
-          }
           upsert: {
             args: Prisma.TaskAssignmentUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TaskAssignmentPayload>
@@ -1165,6 +1124,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.TaskAssignmentGroupByArgs<ExtArgs>
             result: $Utils.Optional<TaskAssignmentGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.TaskAssignmentFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.TaskAssignmentAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.TaskAssignmentCountArgs<ExtArgs>
@@ -1204,10 +1171,6 @@ export namespace Prisma {
             args: Prisma.AttachmentCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.AttachmentCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AttachmentPayload>[]
-          }
           delete: {
             args: Prisma.AttachmentDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$AttachmentPayload>
@@ -1224,10 +1187,6 @@ export namespace Prisma {
             args: Prisma.AttachmentUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.AttachmentUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$AttachmentPayload>[]
-          }
           upsert: {
             args: Prisma.AttachmentUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$AttachmentPayload>
@@ -1239,6 +1198,14 @@ export namespace Prisma {
           groupBy: {
             args: Prisma.AttachmentGroupByArgs<ExtArgs>
             result: $Utils.Optional<AttachmentGroupByOutputType>[]
+          }
+          findRaw: {
+            args: Prisma.AttachmentFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.AttachmentAggregateRawArgs<ExtArgs>
+            result: JsonObject
           }
           count: {
             args: Prisma.AttachmentCountArgs<ExtArgs>
@@ -1278,10 +1245,6 @@ export namespace Prisma {
             args: Prisma.CommentCreateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          createManyAndReturn: {
-            args: Prisma.CommentCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommentPayload>[]
-          }
           delete: {
             args: Prisma.CommentDeleteArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CommentPayload>
@@ -1298,10 +1261,6 @@ export namespace Prisma {
             args: Prisma.CommentUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.CommentUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$CommentPayload>[]
-          }
           upsert: {
             args: Prisma.CommentUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$CommentPayload>
@@ -1314,6 +1273,14 @@ export namespace Prisma {
             args: Prisma.CommentGroupByArgs<ExtArgs>
             result: $Utils.Optional<CommentGroupByOutputType>[]
           }
+          findRaw: {
+            args: Prisma.CommentFindRawArgs<ExtArgs>
+            result: JsonObject
+          }
+          aggregateRaw: {
+            args: Prisma.CommentAggregateRawArgs<ExtArgs>
+            result: JsonObject
+          }
           count: {
             args: Prisma.CommentCountArgs<ExtArgs>
             result: $Utils.Optional<CommentCountAggregateOutputType> | number
@@ -1325,21 +1292,9 @@ export namespace Prisma {
     other: {
       payload: any
       operations: {
-        $executeRaw: {
-          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
-          result: any
-        }
-        $executeRawUnsafe: {
-          args: [query: string, ...values: any[]],
-          result: any
-        }
-        $queryRaw: {
-          args: [query: TemplateStringsArray | Prisma.Sql, ...values: any[]],
-          result: any
-        }
-        $queryRawUnsafe: {
-          args: [query: string, ...values: any[]],
-          result: any
+        $runCommandRaw: {
+          args: Prisma.InputJsonObject,
+          result: Prisma.JsonObject
         }
       }
     }
@@ -1385,7 +1340,6 @@ export namespace Prisma {
     transactionOptions?: {
       maxWait?: number
       timeout?: number
-      isolationLevel?: Prisma.TransactionIsolationLevel
     }
     /**
      * Global configuration for omitting model fields by default.
@@ -1574,12 +1528,12 @@ export namespace Prisma {
 
   export type TeamCountOutputType = {
     projectTeams: number
-    user: number
+    users: number
   }
 
   export type TeamCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     projectTeams?: boolean | TeamCountOutputTypeCountProjectTeamsArgs
-    user?: boolean | TeamCountOutputTypeCountUserArgs
+    users?: boolean | TeamCountOutputTypeCountUsersArgs
   }
 
   // Custom InputTypes
@@ -1603,7 +1557,7 @@ export namespace Prisma {
   /**
    * TeamCountOutputType without action
    */
-  export type TeamCountOutputTypeCountUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type TeamCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: UserWhereInput
   }
 
@@ -1707,40 +1661,28 @@ export namespace Prisma {
 
   export type AggregateUser = {
     _count: UserCountAggregateOutputType | null
-    _avg: UserAvgAggregateOutputType | null
-    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
   }
 
-  export type UserAvgAggregateOutputType = {
-    userId: number | null
-    teamId: number | null
-  }
-
-  export type UserSumAggregateOutputType = {
-    userId: number | null
-    teamId: number | null
-  }
-
   export type UserMinAggregateOutputType = {
-    userId: number | null
+    id: string | null
     cognitoId: string | null
     username: string | null
     profilePictureUrl: string | null
-    teamId: number | null
+    teamId: string | null
   }
 
   export type UserMaxAggregateOutputType = {
-    userId: number | null
+    id: string | null
     cognitoId: string | null
     username: string | null
     profilePictureUrl: string | null
-    teamId: number | null
+    teamId: string | null
   }
 
   export type UserCountAggregateOutputType = {
-    userId: number
+    id: number
     cognitoId: number
     username: number
     profilePictureUrl: number
@@ -1749,18 +1691,8 @@ export namespace Prisma {
   }
 
 
-  export type UserAvgAggregateInputType = {
-    userId?: true
-    teamId?: true
-  }
-
-  export type UserSumAggregateInputType = {
-    userId?: true
-    teamId?: true
-  }
-
   export type UserMinAggregateInputType = {
-    userId?: true
+    id?: true
     cognitoId?: true
     username?: true
     profilePictureUrl?: true
@@ -1768,7 +1700,7 @@ export namespace Prisma {
   }
 
   export type UserMaxAggregateInputType = {
-    userId?: true
+    id?: true
     cognitoId?: true
     username?: true
     profilePictureUrl?: true
@@ -1776,7 +1708,7 @@ export namespace Prisma {
   }
 
   export type UserCountAggregateInputType = {
-    userId?: true
+    id?: true
     cognitoId?: true
     username?: true
     profilePictureUrl?: true
@@ -1822,18 +1754,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: UserAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: UserSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: UserMinAggregateInputType
@@ -1864,21 +1784,17 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: UserCountAggregateInputType | true
-    _avg?: UserAvgAggregateInputType
-    _sum?: UserSumAggregateInputType
     _min?: UserMinAggregateInputType
     _max?: UserMaxAggregateInputType
   }
 
   export type UserGroupByOutputType = {
-    userId: number
+    id: string
     cognitoId: string
     username: string
     profilePictureUrl: string | null
-    teamId: number | null
+    teamId: string | null
     _count: UserCountAggregateOutputType | null
-    _avg: UserAvgAggregateOutputType | null
-    _sum: UserSumAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
   }
@@ -1898,7 +1814,7 @@ export namespace Prisma {
 
 
   export type UserSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    userId?: boolean
+    id?: boolean
     cognitoId?: boolean
     username?: boolean
     profilePictureUrl?: boolean
@@ -1912,33 +1828,17 @@ export namespace Prisma {
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
-  export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    userId?: boolean
-    cognitoId?: boolean
-    username?: boolean
-    profilePictureUrl?: boolean
-    teamId?: boolean
-    team?: boolean | User$teamArgs<ExtArgs>
-  }, ExtArgs["result"]["user"]>
 
-  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    userId?: boolean
-    cognitoId?: boolean
-    username?: boolean
-    profilePictureUrl?: boolean
-    teamId?: boolean
-    team?: boolean | User$teamArgs<ExtArgs>
-  }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
-    userId?: boolean
+    id?: boolean
     cognitoId?: boolean
     username?: boolean
     profilePictureUrl?: boolean
     teamId?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"userId" | "cognitoId" | "username" | "profilePictureUrl" | "teamId", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "cognitoId" | "username" | "profilePictureUrl" | "teamId", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     authoredTasks?: boolean | User$authoredTasksArgs<ExtArgs>
     assignedTasks?: boolean | User$assignedTasksArgs<ExtArgs>
@@ -1947,12 +1847,6 @@ export namespace Prisma {
     comments?: boolean | User$commentsArgs<ExtArgs>
     team?: boolean | User$teamArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
-  }
-  export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    team?: boolean | User$teamArgs<ExtArgs>
-  }
-  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    team?: boolean | User$teamArgs<ExtArgs>
   }
 
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -1966,11 +1860,11 @@ export namespace Prisma {
       team: Prisma.$TeamPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
-      userId: number
+      id: string
       cognitoId: string
       username: string
       profilePictureUrl: string | null
-      teamId: number | null
+      teamId: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -2054,8 +1948,8 @@ export namespace Prisma {
      * // Get first 10 Users
      * const users = await prisma.user.findMany({ take: 10 })
      * 
-     * // Only select the `userId`
-     * const userWithUserIdOnly = await prisma.user.findMany({ select: { userId: true } })
+     * // Only select the `id`
+     * const userWithIdOnly = await prisma.user.findMany({ select: { id: true } })
      * 
      */
     findMany<T extends UserFindManyArgs>(args?: SelectSubset<T, UserFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
@@ -2087,30 +1981,6 @@ export namespace Prisma {
      *     
      */
     createMany<T extends UserCreateManyArgs>(args?: SelectSubset<T, UserCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many Users and returns the data saved in the database.
-     * @param {UserCreateManyAndReturnArgs} args - Arguments to create many Users.
-     * @example
-     * // Create many Users
-     * const user = await prisma.user.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Users and only return the `userId`
-     * const userWithUserIdOnly = await prisma.user.createManyAndReturn({
-     *   select: { userId: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends UserCreateManyAndReturnArgs>(args?: SelectSubset<T, UserCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Delete a User.
@@ -2177,36 +2047,6 @@ export namespace Prisma {
     updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Users and returns the data updated in the database.
-     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
-     * @example
-     * // Update many Users
-     * const user = await prisma.user.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Users and only return the `userId`
-     * const userWithUserIdOnly = await prisma.user.updateManyAndReturn({
-     *   select: { userId: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one User.
      * @param {UserUpsertArgs} args - Arguments to update or create a User.
      * @example
@@ -2224,6 +2064,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends UserUpsertArgs>(args: SelectSubset<T, UserUpsertArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Users that matches the filter.
+     * @param {UserFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const user = await prisma.user.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: UserFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a User.
+     * @param {UserAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const user = await prisma.user.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: UserAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -2400,11 +2263,11 @@ export namespace Prisma {
    * Fields of the User model
    */
   interface UserFieldRefs {
-    readonly userId: FieldRef<"User", 'Int'>
+    readonly id: FieldRef<"User", 'String'>
     readonly cognitoId: FieldRef<"User", 'String'>
     readonly username: FieldRef<"User", 'String'>
     readonly profilePictureUrl: FieldRef<"User", 'String'>
-    readonly teamId: FieldRef<"User", 'Int'>
+    readonly teamId: FieldRef<"User", 'String'>
   }
     
 
@@ -2634,30 +2497,6 @@ export namespace Prisma {
      * The data used to create many Users.
      */
     data: UserCreateManyInput | UserCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * User createManyAndReturn
-   */
-  export type UserCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * The data used to create many Users.
-     */
-    data: UserCreateManyInput | UserCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -2702,36 +2541,6 @@ export namespace Prisma {
      * Limit how many Users to update.
      */
     limit?: number
-  }
-
-  /**
-   * User updateManyAndReturn
-   */
-  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * The data used to update Users.
-     */
-    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
-    /**
-     * Filter which Users to update
-     */
-    where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -2798,6 +2607,34 @@ export namespace Prisma {
      * Limit how many Users to delete.
      */
     limit?: number
+  }
+
+  /**
+   * User findRaw
+   */
+  export type UserFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * User aggregateRaw
+   */
+  export type UserAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
   }
 
   /**
@@ -2964,36 +2801,22 @@ export namespace Prisma {
 
   export type AggregateTeam = {
     _count: TeamCountAggregateOutputType | null
-    _avg: TeamAvgAggregateOutputType | null
-    _sum: TeamSumAggregateOutputType | null
     _min: TeamMinAggregateOutputType | null
     _max: TeamMaxAggregateOutputType | null
   }
 
-  export type TeamAvgAggregateOutputType = {
-    id: number | null
-    productOwnerUserId: number | null
-    projectManagerUserId: number | null
-  }
-
-  export type TeamSumAggregateOutputType = {
-    id: number | null
-    productOwnerUserId: number | null
-    projectManagerUserId: number | null
-  }
-
   export type TeamMinAggregateOutputType = {
-    id: number | null
+    id: string | null
     teamName: string | null
-    productOwnerUserId: number | null
-    projectManagerUserId: number | null
+    productOwnerUserId: string | null
+    projectManagerUserId: string | null
   }
 
   export type TeamMaxAggregateOutputType = {
-    id: number | null
+    id: string | null
     teamName: string | null
-    productOwnerUserId: number | null
-    projectManagerUserId: number | null
+    productOwnerUserId: string | null
+    projectManagerUserId: string | null
   }
 
   export type TeamCountAggregateOutputType = {
@@ -3004,18 +2827,6 @@ export namespace Prisma {
     _all: number
   }
 
-
-  export type TeamAvgAggregateInputType = {
-    id?: true
-    productOwnerUserId?: true
-    projectManagerUserId?: true
-  }
-
-  export type TeamSumAggregateInputType = {
-    id?: true
-    productOwnerUserId?: true
-    projectManagerUserId?: true
-  }
 
   export type TeamMinAggregateInputType = {
     id?: true
@@ -3077,18 +2888,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: TeamAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: TeamSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: TeamMinAggregateInputType
@@ -3119,20 +2918,16 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: TeamCountAggregateInputType | true
-    _avg?: TeamAvgAggregateInputType
-    _sum?: TeamSumAggregateInputType
     _min?: TeamMinAggregateInputType
     _max?: TeamMaxAggregateInputType
   }
 
   export type TeamGroupByOutputType = {
-    id: number
+    id: string
     teamName: string
-    productOwnerUserId: number | null
-    projectManagerUserId: number | null
+    productOwnerUserId: string | null
+    projectManagerUserId: string | null
     _count: TeamCountAggregateOutputType | null
-    _avg: TeamAvgAggregateOutputType | null
-    _sum: TeamSumAggregateOutputType | null
     _min: TeamMinAggregateOutputType | null
     _max: TeamMaxAggregateOutputType | null
   }
@@ -3157,23 +2952,11 @@ export namespace Prisma {
     productOwnerUserId?: boolean
     projectManagerUserId?: boolean
     projectTeams?: boolean | Team$projectTeamsArgs<ExtArgs>
-    user?: boolean | Team$userArgs<ExtArgs>
+    users?: boolean | Team$usersArgs<ExtArgs>
     _count?: boolean | TeamCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["team"]>
 
-  export type TeamSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    teamName?: boolean
-    productOwnerUserId?: boolean
-    projectManagerUserId?: boolean
-  }, ExtArgs["result"]["team"]>
 
-  export type TeamSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    teamName?: boolean
-    productOwnerUserId?: boolean
-    projectManagerUserId?: boolean
-  }, ExtArgs["result"]["team"]>
 
   export type TeamSelectScalar = {
     id?: boolean
@@ -3185,23 +2968,21 @@ export namespace Prisma {
   export type TeamOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "teamName" | "productOwnerUserId" | "projectManagerUserId", ExtArgs["result"]["team"]>
   export type TeamInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     projectTeams?: boolean | Team$projectTeamsArgs<ExtArgs>
-    user?: boolean | Team$userArgs<ExtArgs>
+    users?: boolean | Team$usersArgs<ExtArgs>
     _count?: boolean | TeamCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type TeamIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type TeamIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $TeamPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Team"
     objects: {
       projectTeams: Prisma.$ProjectTeamPayload<ExtArgs>[]
-      user: Prisma.$UserPayload<ExtArgs>[]
+      users: Prisma.$UserPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
+      id: string
       teamName: string
-      productOwnerUserId: number | null
-      projectManagerUserId: number | null
+      productOwnerUserId: string | null
+      projectManagerUserId: string | null
     }, ExtArgs["result"]["team"]>
     composites: {}
   }
@@ -3320,30 +3101,6 @@ export namespace Prisma {
     createMany<T extends TeamCreateManyArgs>(args?: SelectSubset<T, TeamCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Teams and returns the data saved in the database.
-     * @param {TeamCreateManyAndReturnArgs} args - Arguments to create many Teams.
-     * @example
-     * // Create many Teams
-     * const team = await prisma.team.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Teams and only return the `id`
-     * const teamWithIdOnly = await prisma.team.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends TeamCreateManyAndReturnArgs>(args?: SelectSubset<T, TeamCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a Team.
      * @param {TeamDeleteArgs} args - Arguments to delete one Team.
      * @example
@@ -3408,36 +3165,6 @@ export namespace Prisma {
     updateMany<T extends TeamUpdateManyArgs>(args: SelectSubset<T, TeamUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Teams and returns the data updated in the database.
-     * @param {TeamUpdateManyAndReturnArgs} args - Arguments to update many Teams.
-     * @example
-     * // Update many Teams
-     * const team = await prisma.team.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Teams and only return the `id`
-     * const teamWithIdOnly = await prisma.team.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends TeamUpdateManyAndReturnArgs>(args: SelectSubset<T, TeamUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Team.
      * @param {TeamUpsertArgs} args - Arguments to update or create a Team.
      * @example
@@ -3455,6 +3182,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends TeamUpsertArgs>(args: SelectSubset<T, TeamUpsertArgs<ExtArgs>>): Prisma__TeamClient<$Result.GetResult<Prisma.$TeamPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Teams that matches the filter.
+     * @param {TeamFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const team = await prisma.team.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: TeamFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Team.
+     * @param {TeamAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const team = await prisma.team.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: TeamAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -3597,7 +3347,7 @@ export namespace Prisma {
   export interface Prisma__TeamClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     projectTeams<T extends Team$projectTeamsArgs<ExtArgs> = {}>(args?: Subset<T, Team$projectTeamsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectTeamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    user<T extends Team$userArgs<ExtArgs> = {}>(args?: Subset<T, Team$userArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    users<T extends Team$usersArgs<ExtArgs> = {}>(args?: Subset<T, Team$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3627,10 +3377,10 @@ export namespace Prisma {
    * Fields of the Team model
    */
   interface TeamFieldRefs {
-    readonly id: FieldRef<"Team", 'Int'>
+    readonly id: FieldRef<"Team", 'String'>
     readonly teamName: FieldRef<"Team", 'String'>
-    readonly productOwnerUserId: FieldRef<"Team", 'Int'>
-    readonly projectManagerUserId: FieldRef<"Team", 'Int'>
+    readonly productOwnerUserId: FieldRef<"Team", 'String'>
+    readonly projectManagerUserId: FieldRef<"Team", 'String'>
   }
     
 
@@ -3860,26 +3610,6 @@ export namespace Prisma {
      * The data used to create many Teams.
      */
     data: TeamCreateManyInput | TeamCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Team createManyAndReturn
-   */
-  export type TeamCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Team
-     */
-    select?: TeamSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Team
-     */
-    omit?: TeamOmit<ExtArgs> | null
-    /**
-     * The data used to create many Teams.
-     */
-    data: TeamCreateManyInput | TeamCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
   /**
@@ -3912,32 +3642,6 @@ export namespace Prisma {
    * Team updateMany
    */
   export type TeamUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Teams.
-     */
-    data: XOR<TeamUpdateManyMutationInput, TeamUncheckedUpdateManyInput>
-    /**
-     * Filter which Teams to update
-     */
-    where?: TeamWhereInput
-    /**
-     * Limit how many Teams to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Team updateManyAndReturn
-   */
-  export type TeamUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Team
-     */
-    select?: TeamSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Team
-     */
-    omit?: TeamOmit<ExtArgs> | null
     /**
      * The data used to update Teams.
      */
@@ -4019,6 +3723,34 @@ export namespace Prisma {
   }
 
   /**
+   * Team findRaw
+   */
+  export type TeamFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Team aggregateRaw
+   */
+  export type TeamAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
    * Team.projectTeams
    */
   export type Team$projectTeamsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4043,9 +3775,9 @@ export namespace Prisma {
   }
 
   /**
-   * Team.user
+   * Team.users
    */
-  export type Team$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Team$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the User
      */
@@ -4091,22 +3823,12 @@ export namespace Prisma {
 
   export type AggregateProject = {
     _count: ProjectCountAggregateOutputType | null
-    _avg: ProjectAvgAggregateOutputType | null
-    _sum: ProjectSumAggregateOutputType | null
     _min: ProjectMinAggregateOutputType | null
     _max: ProjectMaxAggregateOutputType | null
   }
 
-  export type ProjectAvgAggregateOutputType = {
-    id: number | null
-  }
-
-  export type ProjectSumAggregateOutputType = {
-    id: number | null
-  }
-
   export type ProjectMinAggregateOutputType = {
-    id: number | null
+    id: string | null
     name: string | null
     description: string | null
     startDate: Date | null
@@ -4114,7 +3836,7 @@ export namespace Prisma {
   }
 
   export type ProjectMaxAggregateOutputType = {
-    id: number | null
+    id: string | null
     name: string | null
     description: string | null
     startDate: Date | null
@@ -4130,14 +3852,6 @@ export namespace Prisma {
     _all: number
   }
 
-
-  export type ProjectAvgAggregateInputType = {
-    id?: true
-  }
-
-  export type ProjectSumAggregateInputType = {
-    id?: true
-  }
 
   export type ProjectMinAggregateInputType = {
     id?: true
@@ -4202,18 +3916,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: ProjectAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: ProjectSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: ProjectMinAggregateInputType
@@ -4244,21 +3946,17 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: ProjectCountAggregateInputType | true
-    _avg?: ProjectAvgAggregateInputType
-    _sum?: ProjectSumAggregateInputType
     _min?: ProjectMinAggregateInputType
     _max?: ProjectMaxAggregateInputType
   }
 
   export type ProjectGroupByOutputType = {
-    id: number
+    id: string
     name: string
     description: string | null
     startDate: Date | null
     endDate: Date | null
     _count: ProjectCountAggregateOutputType | null
-    _avg: ProjectAvgAggregateOutputType | null
-    _sum: ProjectSumAggregateOutputType | null
     _min: ProjectMinAggregateOutputType | null
     _max: ProjectMaxAggregateOutputType | null
   }
@@ -4288,21 +3986,7 @@ export namespace Prisma {
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["project"]>
 
-  export type ProjectSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    description?: boolean
-    startDate?: boolean
-    endDate?: boolean
-  }, ExtArgs["result"]["project"]>
 
-  export type ProjectSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    description?: boolean
-    startDate?: boolean
-    endDate?: boolean
-  }, ExtArgs["result"]["project"]>
 
   export type ProjectSelectScalar = {
     id?: boolean
@@ -4318,8 +4002,6 @@ export namespace Prisma {
     projectTeams?: boolean | Project$projectTeamsArgs<ExtArgs>
     _count?: boolean | ProjectCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type ProjectIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type ProjectIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $ProjectPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Project"
@@ -4328,7 +4010,7 @@ export namespace Prisma {
       projectTeams: Prisma.$ProjectTeamPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
+      id: string
       name: string
       description: string | null
       startDate: Date | null
@@ -4451,30 +4133,6 @@ export namespace Prisma {
     createMany<T extends ProjectCreateManyArgs>(args?: SelectSubset<T, ProjectCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Projects and returns the data saved in the database.
-     * @param {ProjectCreateManyAndReturnArgs} args - Arguments to create many Projects.
-     * @example
-     * // Create many Projects
-     * const project = await prisma.project.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Projects and only return the `id`
-     * const projectWithIdOnly = await prisma.project.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends ProjectCreateManyAndReturnArgs>(args?: SelectSubset<T, ProjectCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a Project.
      * @param {ProjectDeleteArgs} args - Arguments to delete one Project.
      * @example
@@ -4539,36 +4197,6 @@ export namespace Prisma {
     updateMany<T extends ProjectUpdateManyArgs>(args: SelectSubset<T, ProjectUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Projects and returns the data updated in the database.
-     * @param {ProjectUpdateManyAndReturnArgs} args - Arguments to update many Projects.
-     * @example
-     * // Update many Projects
-     * const project = await prisma.project.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Projects and only return the `id`
-     * const projectWithIdOnly = await prisma.project.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ProjectUpdateManyAndReturnArgs>(args: SelectSubset<T, ProjectUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Project.
      * @param {ProjectUpsertArgs} args - Arguments to update or create a Project.
      * @example
@@ -4586,6 +4214,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends ProjectUpsertArgs>(args: SelectSubset<T, ProjectUpsertArgs<ExtArgs>>): Prisma__ProjectClient<$Result.GetResult<Prisma.$ProjectPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Projects that matches the filter.
+     * @param {ProjectFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const project = await prisma.project.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: ProjectFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Project.
+     * @param {ProjectAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const project = await prisma.project.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: ProjectAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -4758,7 +4409,7 @@ export namespace Prisma {
    * Fields of the Project model
    */
   interface ProjectFieldRefs {
-    readonly id: FieldRef<"Project", 'Int'>
+    readonly id: FieldRef<"Project", 'String'>
     readonly name: FieldRef<"Project", 'String'>
     readonly description: FieldRef<"Project", 'String'>
     readonly startDate: FieldRef<"Project", 'DateTime'>
@@ -4992,26 +4643,6 @@ export namespace Prisma {
      * The data used to create many Projects.
      */
     data: ProjectCreateManyInput | ProjectCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Project createManyAndReturn
-   */
-  export type ProjectCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Project
-     */
-    select?: ProjectSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Project
-     */
-    omit?: ProjectOmit<ExtArgs> | null
-    /**
-     * The data used to create many Projects.
-     */
-    data: ProjectCreateManyInput | ProjectCreateManyInput[]
-    skipDuplicates?: boolean
   }
 
   /**
@@ -5044,32 +4675,6 @@ export namespace Prisma {
    * Project updateMany
    */
   export type ProjectUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update Projects.
-     */
-    data: XOR<ProjectUpdateManyMutationInput, ProjectUncheckedUpdateManyInput>
-    /**
-     * Filter which Projects to update
-     */
-    where?: ProjectWhereInput
-    /**
-     * Limit how many Projects to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Project updateManyAndReturn
-   */
-  export type ProjectUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Project
-     */
-    select?: ProjectSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Project
-     */
-    omit?: ProjectOmit<ExtArgs> | null
     /**
      * The data used to update Projects.
      */
@@ -5151,6 +4756,34 @@ export namespace Prisma {
   }
 
   /**
+   * Project findRaw
+   */
+  export type ProjectFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Project aggregateRaw
+   */
+  export type ProjectAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
    * Project.tasks
    */
   export type Project$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5223,34 +4856,20 @@ export namespace Prisma {
 
   export type AggregateProjectTeam = {
     _count: ProjectTeamCountAggregateOutputType | null
-    _avg: ProjectTeamAvgAggregateOutputType | null
-    _sum: ProjectTeamSumAggregateOutputType | null
     _min: ProjectTeamMinAggregateOutputType | null
     _max: ProjectTeamMaxAggregateOutputType | null
   }
 
-  export type ProjectTeamAvgAggregateOutputType = {
-    id: number | null
-    teamId: number | null
-    projectId: number | null
-  }
-
-  export type ProjectTeamSumAggregateOutputType = {
-    id: number | null
-    teamId: number | null
-    projectId: number | null
-  }
-
   export type ProjectTeamMinAggregateOutputType = {
-    id: number | null
-    teamId: number | null
-    projectId: number | null
+    id: string | null
+    teamId: string | null
+    projectId: string | null
   }
 
   export type ProjectTeamMaxAggregateOutputType = {
-    id: number | null
-    teamId: number | null
-    projectId: number | null
+    id: string | null
+    teamId: string | null
+    projectId: string | null
   }
 
   export type ProjectTeamCountAggregateOutputType = {
@@ -5260,18 +4879,6 @@ export namespace Prisma {
     _all: number
   }
 
-
-  export type ProjectTeamAvgAggregateInputType = {
-    id?: true
-    teamId?: true
-    projectId?: true
-  }
-
-  export type ProjectTeamSumAggregateInputType = {
-    id?: true
-    teamId?: true
-    projectId?: true
-  }
 
   export type ProjectTeamMinAggregateInputType = {
     id?: true
@@ -5330,18 +4937,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: ProjectTeamAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: ProjectTeamSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: ProjectTeamMinAggregateInputType
@@ -5372,19 +4967,15 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: ProjectTeamCountAggregateInputType | true
-    _avg?: ProjectTeamAvgAggregateInputType
-    _sum?: ProjectTeamSumAggregateInputType
     _min?: ProjectTeamMinAggregateInputType
     _max?: ProjectTeamMaxAggregateInputType
   }
 
   export type ProjectTeamGroupByOutputType = {
-    id: number
-    teamId: number
-    projectId: number
+    id: string
+    teamId: string
+    projectId: string
     _count: ProjectTeamCountAggregateOutputType | null
-    _avg: ProjectTeamAvgAggregateOutputType | null
-    _sum: ProjectTeamSumAggregateOutputType | null
     _min: ProjectTeamMinAggregateOutputType | null
     _max: ProjectTeamMaxAggregateOutputType | null
   }
@@ -5411,21 +5002,7 @@ export namespace Prisma {
     project?: boolean | ProjectDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["projectTeam"]>
 
-  export type ProjectTeamSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    teamId?: boolean
-    projectId?: boolean
-    team?: boolean | TeamDefaultArgs<ExtArgs>
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["projectTeam"]>
 
-  export type ProjectTeamSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    teamId?: boolean
-    projectId?: boolean
-    team?: boolean | TeamDefaultArgs<ExtArgs>
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["projectTeam"]>
 
   export type ProjectTeamSelectScalar = {
     id?: boolean
@@ -5438,14 +5015,6 @@ export namespace Prisma {
     team?: boolean | TeamDefaultArgs<ExtArgs>
     project?: boolean | ProjectDefaultArgs<ExtArgs>
   }
-  export type ProjectTeamIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    team?: boolean | TeamDefaultArgs<ExtArgs>
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-  }
-  export type ProjectTeamIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    team?: boolean | TeamDefaultArgs<ExtArgs>
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-  }
 
   export type $ProjectTeamPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "ProjectTeam"
@@ -5454,9 +5023,9 @@ export namespace Prisma {
       project: Prisma.$ProjectPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
-      teamId: number
-      projectId: number
+      id: string
+      teamId: string
+      projectId: string
     }, ExtArgs["result"]["projectTeam"]>
     composites: {}
   }
@@ -5575,30 +5144,6 @@ export namespace Prisma {
     createMany<T extends ProjectTeamCreateManyArgs>(args?: SelectSubset<T, ProjectTeamCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many ProjectTeams and returns the data saved in the database.
-     * @param {ProjectTeamCreateManyAndReturnArgs} args - Arguments to create many ProjectTeams.
-     * @example
-     * // Create many ProjectTeams
-     * const projectTeam = await prisma.projectTeam.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many ProjectTeams and only return the `id`
-     * const projectTeamWithIdOnly = await prisma.projectTeam.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends ProjectTeamCreateManyAndReturnArgs>(args?: SelectSubset<T, ProjectTeamCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectTeamPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a ProjectTeam.
      * @param {ProjectTeamDeleteArgs} args - Arguments to delete one ProjectTeam.
      * @example
@@ -5663,36 +5208,6 @@ export namespace Prisma {
     updateMany<T extends ProjectTeamUpdateManyArgs>(args: SelectSubset<T, ProjectTeamUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more ProjectTeams and returns the data updated in the database.
-     * @param {ProjectTeamUpdateManyAndReturnArgs} args - Arguments to update many ProjectTeams.
-     * @example
-     * // Update many ProjectTeams
-     * const projectTeam = await prisma.projectTeam.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ProjectTeams and only return the `id`
-     * const projectTeamWithIdOnly = await prisma.projectTeam.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ProjectTeamUpdateManyAndReturnArgs>(args: SelectSubset<T, ProjectTeamUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProjectTeamPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one ProjectTeam.
      * @param {ProjectTeamUpsertArgs} args - Arguments to update or create a ProjectTeam.
      * @example
@@ -5710,6 +5225,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends ProjectTeamUpsertArgs>(args: SelectSubset<T, ProjectTeamUpsertArgs<ExtArgs>>): Prisma__ProjectTeamClient<$Result.GetResult<Prisma.$ProjectTeamPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more ProjectTeams that matches the filter.
+     * @param {ProjectTeamFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const projectTeam = await prisma.projectTeam.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: ProjectTeamFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a ProjectTeam.
+     * @param {ProjectTeamAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const projectTeam = await prisma.projectTeam.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: ProjectTeamAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -5882,9 +5420,9 @@ export namespace Prisma {
    * Fields of the ProjectTeam model
    */
   interface ProjectTeamFieldRefs {
-    readonly id: FieldRef<"ProjectTeam", 'Int'>
-    readonly teamId: FieldRef<"ProjectTeam", 'Int'>
-    readonly projectId: FieldRef<"ProjectTeam", 'Int'>
+    readonly id: FieldRef<"ProjectTeam", 'String'>
+    readonly teamId: FieldRef<"ProjectTeam", 'String'>
+    readonly projectId: FieldRef<"ProjectTeam", 'String'>
   }
     
 
@@ -6114,30 +5652,6 @@ export namespace Prisma {
      * The data used to create many ProjectTeams.
      */
     data: ProjectTeamCreateManyInput | ProjectTeamCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * ProjectTeam createManyAndReturn
-   */
-  export type ProjectTeamCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectTeam
-     */
-    select?: ProjectTeamSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectTeam
-     */
-    omit?: ProjectTeamOmit<ExtArgs> | null
-    /**
-     * The data used to create many ProjectTeams.
-     */
-    data: ProjectTeamCreateManyInput | ProjectTeamCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectTeamIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6182,36 +5696,6 @@ export namespace Prisma {
      * Limit how many ProjectTeams to update.
      */
     limit?: number
-  }
-
-  /**
-   * ProjectTeam updateManyAndReturn
-   */
-  export type ProjectTeamUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ProjectTeam
-     */
-    select?: ProjectTeamSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ProjectTeam
-     */
-    omit?: ProjectTeamOmit<ExtArgs> | null
-    /**
-     * The data used to update ProjectTeams.
-     */
-    data: XOR<ProjectTeamUpdateManyMutationInput, ProjectTeamUncheckedUpdateManyInput>
-    /**
-     * Filter which ProjectTeams to update
-     */
-    where?: ProjectTeamWhereInput
-    /**
-     * Limit how many ProjectTeams to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProjectTeamIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6281,6 +5765,34 @@ export namespace Prisma {
   }
 
   /**
+   * ProjectTeam findRaw
+   */
+  export type ProjectTeamFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * ProjectTeam aggregateRaw
+   */
+  export type ProjectTeamAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
    * ProjectTeam without action
    */
   export type ProjectTeamDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6312,23 +5824,15 @@ export namespace Prisma {
   }
 
   export type TaskAvgAggregateOutputType = {
-    id: number | null
     points: number | null
-    projectId: number | null
-    authorUserId: number | null
-    assignedUserId: number | null
   }
 
   export type TaskSumAggregateOutputType = {
-    id: number | null
     points: number | null
-    projectId: number | null
-    authorUserId: number | null
-    assignedUserId: number | null
   }
 
   export type TaskMinAggregateOutputType = {
-    id: number | null
+    id: string | null
     title: string | null
     description: string | null
     status: string | null
@@ -6337,13 +5841,13 @@ export namespace Prisma {
     startDate: Date | null
     dueDate: Date | null
     points: number | null
-    projectId: number | null
-    authorUserId: number | null
-    assignedUserId: number | null
+    projectId: string | null
+    authorUserId: string | null
+    assignedUserId: string | null
   }
 
   export type TaskMaxAggregateOutputType = {
-    id: number | null
+    id: string | null
     title: string | null
     description: string | null
     status: string | null
@@ -6352,9 +5856,9 @@ export namespace Prisma {
     startDate: Date | null
     dueDate: Date | null
     points: number | null
-    projectId: number | null
-    authorUserId: number | null
-    assignedUserId: number | null
+    projectId: string | null
+    authorUserId: string | null
+    assignedUserId: string | null
   }
 
   export type TaskCountAggregateOutputType = {
@@ -6375,19 +5879,11 @@ export namespace Prisma {
 
 
   export type TaskAvgAggregateInputType = {
-    id?: true
     points?: true
-    projectId?: true
-    authorUserId?: true
-    assignedUserId?: true
   }
 
   export type TaskSumAggregateInputType = {
-    id?: true
     points?: true
-    projectId?: true
-    authorUserId?: true
-    assignedUserId?: true
   }
 
   export type TaskMinAggregateInputType = {
@@ -6523,7 +6019,7 @@ export namespace Prisma {
   }
 
   export type TaskGroupByOutputType = {
-    id: number
+    id: string
     title: string
     description: string | null
     status: string | null
@@ -6532,9 +6028,9 @@ export namespace Prisma {
     startDate: Date | null
     dueDate: Date | null
     points: number | null
-    projectId: number
-    authorUserId: number
-    assignedUserId: number | null
+    projectId: string
+    authorUserId: string
+    assignedUserId: string | null
     _count: TaskCountAggregateOutputType | null
     _avg: TaskAvgAggregateOutputType | null
     _sum: TaskSumAggregateOutputType | null
@@ -6578,41 +6074,7 @@ export namespace Prisma {
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["task"]>
 
-  export type TaskSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    title?: boolean
-    description?: boolean
-    status?: boolean
-    priority?: boolean
-    tags?: boolean
-    startDate?: boolean
-    dueDate?: boolean
-    points?: boolean
-    projectId?: boolean
-    authorUserId?: boolean
-    assignedUserId?: boolean
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-    author?: boolean | UserDefaultArgs<ExtArgs>
-    assignee?: boolean | Task$assigneeArgs<ExtArgs>
-  }, ExtArgs["result"]["task"]>
 
-  export type TaskSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    title?: boolean
-    description?: boolean
-    status?: boolean
-    priority?: boolean
-    tags?: boolean
-    startDate?: boolean
-    dueDate?: boolean
-    points?: boolean
-    projectId?: boolean
-    authorUserId?: boolean
-    assignedUserId?: boolean
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-    author?: boolean | UserDefaultArgs<ExtArgs>
-    assignee?: boolean | Task$assigneeArgs<ExtArgs>
-  }, ExtArgs["result"]["task"]>
 
   export type TaskSelectScalar = {
     id?: boolean
@@ -6639,16 +6101,6 @@ export namespace Prisma {
     comments?: boolean | Task$commentsArgs<ExtArgs>
     _count?: boolean | TaskCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type TaskIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-    author?: boolean | UserDefaultArgs<ExtArgs>
-    assignee?: boolean | Task$assigneeArgs<ExtArgs>
-  }
-  export type TaskIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    project?: boolean | ProjectDefaultArgs<ExtArgs>
-    author?: boolean | UserDefaultArgs<ExtArgs>
-    assignee?: boolean | Task$assigneeArgs<ExtArgs>
-  }
 
   export type $TaskPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Task"
@@ -6661,7 +6113,7 @@ export namespace Prisma {
       comments: Prisma.$CommentPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
+      id: string
       title: string
       description: string | null
       status: string | null
@@ -6670,9 +6122,9 @@ export namespace Prisma {
       startDate: Date | null
       dueDate: Date | null
       points: number | null
-      projectId: number
-      authorUserId: number
-      assignedUserId: number | null
+      projectId: string
+      authorUserId: string
+      assignedUserId: string | null
     }, ExtArgs["result"]["task"]>
     composites: {}
   }
@@ -6791,30 +6243,6 @@ export namespace Prisma {
     createMany<T extends TaskCreateManyArgs>(args?: SelectSubset<T, TaskCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Tasks and returns the data saved in the database.
-     * @param {TaskCreateManyAndReturnArgs} args - Arguments to create many Tasks.
-     * @example
-     * // Create many Tasks
-     * const task = await prisma.task.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Tasks and only return the `id`
-     * const taskWithIdOnly = await prisma.task.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends TaskCreateManyAndReturnArgs>(args?: SelectSubset<T, TaskCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a Task.
      * @param {TaskDeleteArgs} args - Arguments to delete one Task.
      * @example
@@ -6879,36 +6307,6 @@ export namespace Prisma {
     updateMany<T extends TaskUpdateManyArgs>(args: SelectSubset<T, TaskUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Tasks and returns the data updated in the database.
-     * @param {TaskUpdateManyAndReturnArgs} args - Arguments to update many Tasks.
-     * @example
-     * // Update many Tasks
-     * const task = await prisma.task.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Tasks and only return the `id`
-     * const taskWithIdOnly = await prisma.task.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends TaskUpdateManyAndReturnArgs>(args: SelectSubset<T, TaskUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Task.
      * @param {TaskUpsertArgs} args - Arguments to update or create a Task.
      * @example
@@ -6926,6 +6324,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends TaskUpsertArgs>(args: SelectSubset<T, TaskUpsertArgs<ExtArgs>>): Prisma__TaskClient<$Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Tasks that matches the filter.
+     * @param {TaskFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const task = await prisma.task.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: TaskFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Task.
+     * @param {TaskAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const task = await prisma.task.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: TaskAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -7102,7 +6523,7 @@ export namespace Prisma {
    * Fields of the Task model
    */
   interface TaskFieldRefs {
-    readonly id: FieldRef<"Task", 'Int'>
+    readonly id: FieldRef<"Task", 'String'>
     readonly title: FieldRef<"Task", 'String'>
     readonly description: FieldRef<"Task", 'String'>
     readonly status: FieldRef<"Task", 'String'>
@@ -7111,9 +6532,9 @@ export namespace Prisma {
     readonly startDate: FieldRef<"Task", 'DateTime'>
     readonly dueDate: FieldRef<"Task", 'DateTime'>
     readonly points: FieldRef<"Task", 'Int'>
-    readonly projectId: FieldRef<"Task", 'Int'>
-    readonly authorUserId: FieldRef<"Task", 'Int'>
-    readonly assignedUserId: FieldRef<"Task", 'Int'>
+    readonly projectId: FieldRef<"Task", 'String'>
+    readonly authorUserId: FieldRef<"Task", 'String'>
+    readonly assignedUserId: FieldRef<"Task", 'String'>
   }
     
 
@@ -7343,30 +6764,6 @@ export namespace Prisma {
      * The data used to create many Tasks.
      */
     data: TaskCreateManyInput | TaskCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Task createManyAndReturn
-   */
-  export type TaskCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Task
-     */
-    select?: TaskSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Task
-     */
-    omit?: TaskOmit<ExtArgs> | null
-    /**
-     * The data used to create many Tasks.
-     */
-    data: TaskCreateManyInput | TaskCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -7411,36 +6808,6 @@ export namespace Prisma {
      * Limit how many Tasks to update.
      */
     limit?: number
-  }
-
-  /**
-   * Task updateManyAndReturn
-   */
-  export type TaskUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Task
-     */
-    select?: TaskSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Task
-     */
-    omit?: TaskOmit<ExtArgs> | null
-    /**
-     * The data used to update Tasks.
-     */
-    data: XOR<TaskUpdateManyMutationInput, TaskUncheckedUpdateManyInput>
-    /**
-     * Filter which Tasks to update
-     */
-    where?: TaskWhereInput
-    /**
-     * Limit how many Tasks to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -7507,6 +6874,34 @@ export namespace Prisma {
      * Limit how many Tasks to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Task findRaw
+   */
+  export type TaskFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Task aggregateRaw
+   */
+  export type TaskAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
   }
 
   /**
@@ -7625,34 +7020,20 @@ export namespace Prisma {
 
   export type AggregateTaskAssignment = {
     _count: TaskAssignmentCountAggregateOutputType | null
-    _avg: TaskAssignmentAvgAggregateOutputType | null
-    _sum: TaskAssignmentSumAggregateOutputType | null
     _min: TaskAssignmentMinAggregateOutputType | null
     _max: TaskAssignmentMaxAggregateOutputType | null
   }
 
-  export type TaskAssignmentAvgAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    taskId: number | null
-  }
-
-  export type TaskAssignmentSumAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    taskId: number | null
-  }
-
   export type TaskAssignmentMinAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    taskId: number | null
+    id: string | null
+    userId: string | null
+    taskId: string | null
   }
 
   export type TaskAssignmentMaxAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    taskId: number | null
+    id: string | null
+    userId: string | null
+    taskId: string | null
   }
 
   export type TaskAssignmentCountAggregateOutputType = {
@@ -7662,18 +7043,6 @@ export namespace Prisma {
     _all: number
   }
 
-
-  export type TaskAssignmentAvgAggregateInputType = {
-    id?: true
-    userId?: true
-    taskId?: true
-  }
-
-  export type TaskAssignmentSumAggregateInputType = {
-    id?: true
-    userId?: true
-    taskId?: true
-  }
 
   export type TaskAssignmentMinAggregateInputType = {
     id?: true
@@ -7732,18 +7101,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: TaskAssignmentAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: TaskAssignmentSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: TaskAssignmentMinAggregateInputType
@@ -7774,19 +7131,15 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: TaskAssignmentCountAggregateInputType | true
-    _avg?: TaskAssignmentAvgAggregateInputType
-    _sum?: TaskAssignmentSumAggregateInputType
     _min?: TaskAssignmentMinAggregateInputType
     _max?: TaskAssignmentMaxAggregateInputType
   }
 
   export type TaskAssignmentGroupByOutputType = {
-    id: number
-    userId: number
-    taskId: number
+    id: string
+    userId: string
+    taskId: string
     _count: TaskAssignmentCountAggregateOutputType | null
-    _avg: TaskAssignmentAvgAggregateOutputType | null
-    _sum: TaskAssignmentSumAggregateOutputType | null
     _min: TaskAssignmentMinAggregateOutputType | null
     _max: TaskAssignmentMaxAggregateOutputType | null
   }
@@ -7813,21 +7166,7 @@ export namespace Prisma {
     task?: boolean | TaskDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["taskAssignment"]>
 
-  export type TaskAssignmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    taskId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["taskAssignment"]>
 
-  export type TaskAssignmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    taskId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["taskAssignment"]>
 
   export type TaskAssignmentSelectScalar = {
     id?: boolean
@@ -7840,14 +7179,6 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
     task?: boolean | TaskDefaultArgs<ExtArgs>
   }
-  export type TaskAssignmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-  }
-  export type TaskAssignmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-  }
 
   export type $TaskAssignmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "TaskAssignment"
@@ -7856,9 +7187,9 @@ export namespace Prisma {
       task: Prisma.$TaskPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
-      userId: number
-      taskId: number
+      id: string
+      userId: string
+      taskId: string
     }, ExtArgs["result"]["taskAssignment"]>
     composites: {}
   }
@@ -7977,30 +7308,6 @@ export namespace Prisma {
     createMany<T extends TaskAssignmentCreateManyArgs>(args?: SelectSubset<T, TaskAssignmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many TaskAssignments and returns the data saved in the database.
-     * @param {TaskAssignmentCreateManyAndReturnArgs} args - Arguments to create many TaskAssignments.
-     * @example
-     * // Create many TaskAssignments
-     * const taskAssignment = await prisma.taskAssignment.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many TaskAssignments and only return the `id`
-     * const taskAssignmentWithIdOnly = await prisma.taskAssignment.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends TaskAssignmentCreateManyAndReturnArgs>(args?: SelectSubset<T, TaskAssignmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskAssignmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a TaskAssignment.
      * @param {TaskAssignmentDeleteArgs} args - Arguments to delete one TaskAssignment.
      * @example
@@ -8065,36 +7372,6 @@ export namespace Prisma {
     updateMany<T extends TaskAssignmentUpdateManyArgs>(args: SelectSubset<T, TaskAssignmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more TaskAssignments and returns the data updated in the database.
-     * @param {TaskAssignmentUpdateManyAndReturnArgs} args - Arguments to update many TaskAssignments.
-     * @example
-     * // Update many TaskAssignments
-     * const taskAssignment = await prisma.taskAssignment.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more TaskAssignments and only return the `id`
-     * const taskAssignmentWithIdOnly = await prisma.taskAssignment.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends TaskAssignmentUpdateManyAndReturnArgs>(args: SelectSubset<T, TaskAssignmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TaskAssignmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one TaskAssignment.
      * @param {TaskAssignmentUpsertArgs} args - Arguments to update or create a TaskAssignment.
      * @example
@@ -8112,6 +7389,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends TaskAssignmentUpsertArgs>(args: SelectSubset<T, TaskAssignmentUpsertArgs<ExtArgs>>): Prisma__TaskAssignmentClient<$Result.GetResult<Prisma.$TaskAssignmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more TaskAssignments that matches the filter.
+     * @param {TaskAssignmentFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const taskAssignment = await prisma.taskAssignment.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: TaskAssignmentFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a TaskAssignment.
+     * @param {TaskAssignmentAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const taskAssignment = await prisma.taskAssignment.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: TaskAssignmentAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -8284,9 +7584,9 @@ export namespace Prisma {
    * Fields of the TaskAssignment model
    */
   interface TaskAssignmentFieldRefs {
-    readonly id: FieldRef<"TaskAssignment", 'Int'>
-    readonly userId: FieldRef<"TaskAssignment", 'Int'>
-    readonly taskId: FieldRef<"TaskAssignment", 'Int'>
+    readonly id: FieldRef<"TaskAssignment", 'String'>
+    readonly userId: FieldRef<"TaskAssignment", 'String'>
+    readonly taskId: FieldRef<"TaskAssignment", 'String'>
   }
     
 
@@ -8516,30 +7816,6 @@ export namespace Prisma {
      * The data used to create many TaskAssignments.
      */
     data: TaskAssignmentCreateManyInput | TaskAssignmentCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * TaskAssignment createManyAndReturn
-   */
-  export type TaskAssignmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskAssignment
-     */
-    select?: TaskAssignmentSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskAssignment
-     */
-    omit?: TaskAssignmentOmit<ExtArgs> | null
-    /**
-     * The data used to create many TaskAssignments.
-     */
-    data: TaskAssignmentCreateManyInput | TaskAssignmentCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskAssignmentIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -8584,36 +7860,6 @@ export namespace Prisma {
      * Limit how many TaskAssignments to update.
      */
     limit?: number
-  }
-
-  /**
-   * TaskAssignment updateManyAndReturn
-   */
-  export type TaskAssignmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the TaskAssignment
-     */
-    select?: TaskAssignmentSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the TaskAssignment
-     */
-    omit?: TaskAssignmentOmit<ExtArgs> | null
-    /**
-     * The data used to update TaskAssignments.
-     */
-    data: XOR<TaskAssignmentUpdateManyMutationInput, TaskAssignmentUncheckedUpdateManyInput>
-    /**
-     * Filter which TaskAssignments to update
-     */
-    where?: TaskAssignmentWhereInput
-    /**
-     * Limit how many TaskAssignments to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: TaskAssignmentIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -8683,6 +7929,34 @@ export namespace Prisma {
   }
 
   /**
+   * TaskAssignment findRaw
+   */
+  export type TaskAssignmentFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * TaskAssignment aggregateRaw
+   */
+  export type TaskAssignmentAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
    * TaskAssignment without action
    */
   export type TaskAssignmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8707,38 +7981,24 @@ export namespace Prisma {
 
   export type AggregateAttachment = {
     _count: AttachmentCountAggregateOutputType | null
-    _avg: AttachmentAvgAggregateOutputType | null
-    _sum: AttachmentSumAggregateOutputType | null
     _min: AttachmentMinAggregateOutputType | null
     _max: AttachmentMaxAggregateOutputType | null
   }
 
-  export type AttachmentAvgAggregateOutputType = {
-    id: number | null
-    taskId: number | null
-    uploadedById: number | null
-  }
-
-  export type AttachmentSumAggregateOutputType = {
-    id: number | null
-    taskId: number | null
-    uploadedById: number | null
-  }
-
   export type AttachmentMinAggregateOutputType = {
-    id: number | null
+    id: string | null
     fileURL: string | null
     fileName: string | null
-    taskId: number | null
-    uploadedById: number | null
+    taskId: string | null
+    uploadedById: string | null
   }
 
   export type AttachmentMaxAggregateOutputType = {
-    id: number | null
+    id: string | null
     fileURL: string | null
     fileName: string | null
-    taskId: number | null
-    uploadedById: number | null
+    taskId: string | null
+    uploadedById: string | null
   }
 
   export type AttachmentCountAggregateOutputType = {
@@ -8750,18 +8010,6 @@ export namespace Prisma {
     _all: number
   }
 
-
-  export type AttachmentAvgAggregateInputType = {
-    id?: true
-    taskId?: true
-    uploadedById?: true
-  }
-
-  export type AttachmentSumAggregateInputType = {
-    id?: true
-    taskId?: true
-    uploadedById?: true
-  }
 
   export type AttachmentMinAggregateInputType = {
     id?: true
@@ -8826,18 +8074,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: AttachmentAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: AttachmentSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: AttachmentMinAggregateInputType
@@ -8868,21 +8104,17 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: AttachmentCountAggregateInputType | true
-    _avg?: AttachmentAvgAggregateInputType
-    _sum?: AttachmentSumAggregateInputType
     _min?: AttachmentMinAggregateInputType
     _max?: AttachmentMaxAggregateInputType
   }
 
   export type AttachmentGroupByOutputType = {
-    id: number
+    id: string
     fileURL: string
     fileName: string | null
-    taskId: number
-    uploadedById: number
+    taskId: string
+    uploadedById: string
     _count: AttachmentCountAggregateOutputType | null
-    _avg: AttachmentAvgAggregateOutputType | null
-    _sum: AttachmentSumAggregateOutputType | null
     _min: AttachmentMinAggregateOutputType | null
     _max: AttachmentMaxAggregateOutputType | null
   }
@@ -8911,25 +8143,7 @@ export namespace Prisma {
     uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["attachment"]>
 
-  export type AttachmentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    fileURL?: boolean
-    fileName?: boolean
-    taskId?: boolean
-    uploadedById?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["attachment"]>
 
-  export type AttachmentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    fileURL?: boolean
-    fileName?: boolean
-    taskId?: boolean
-    uploadedById?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["attachment"]>
 
   export type AttachmentSelectScalar = {
     id?: boolean
@@ -8944,14 +8158,6 @@ export namespace Prisma {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
   }
-  export type AttachmentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type AttachmentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    uploadedBy?: boolean | UserDefaultArgs<ExtArgs>
-  }
 
   export type $AttachmentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Attachment"
@@ -8960,11 +8166,11 @@ export namespace Prisma {
       uploadedBy: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
+      id: string
       fileURL: string
       fileName: string | null
-      taskId: number
-      uploadedById: number
+      taskId: string
+      uploadedById: string
     }, ExtArgs["result"]["attachment"]>
     composites: {}
   }
@@ -9083,30 +8289,6 @@ export namespace Prisma {
     createMany<T extends AttachmentCreateManyArgs>(args?: SelectSubset<T, AttachmentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Attachments and returns the data saved in the database.
-     * @param {AttachmentCreateManyAndReturnArgs} args - Arguments to create many Attachments.
-     * @example
-     * // Create many Attachments
-     * const attachment = await prisma.attachment.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Attachments and only return the `id`
-     * const attachmentWithIdOnly = await prisma.attachment.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends AttachmentCreateManyAndReturnArgs>(args?: SelectSubset<T, AttachmentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a Attachment.
      * @param {AttachmentDeleteArgs} args - Arguments to delete one Attachment.
      * @example
@@ -9171,36 +8353,6 @@ export namespace Prisma {
     updateMany<T extends AttachmentUpdateManyArgs>(args: SelectSubset<T, AttachmentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Attachments and returns the data updated in the database.
-     * @param {AttachmentUpdateManyAndReturnArgs} args - Arguments to update many Attachments.
-     * @example
-     * // Update many Attachments
-     * const attachment = await prisma.attachment.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Attachments and only return the `id`
-     * const attachmentWithIdOnly = await prisma.attachment.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends AttachmentUpdateManyAndReturnArgs>(args: SelectSubset<T, AttachmentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Attachment.
      * @param {AttachmentUpsertArgs} args - Arguments to update or create a Attachment.
      * @example
@@ -9218,6 +8370,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends AttachmentUpsertArgs>(args: SelectSubset<T, AttachmentUpsertArgs<ExtArgs>>): Prisma__AttachmentClient<$Result.GetResult<Prisma.$AttachmentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Attachments that matches the filter.
+     * @param {AttachmentFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const attachment = await prisma.attachment.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: AttachmentFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Attachment.
+     * @param {AttachmentAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const attachment = await prisma.attachment.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: AttachmentAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -9390,11 +8565,11 @@ export namespace Prisma {
    * Fields of the Attachment model
    */
   interface AttachmentFieldRefs {
-    readonly id: FieldRef<"Attachment", 'Int'>
+    readonly id: FieldRef<"Attachment", 'String'>
     readonly fileURL: FieldRef<"Attachment", 'String'>
     readonly fileName: FieldRef<"Attachment", 'String'>
-    readonly taskId: FieldRef<"Attachment", 'Int'>
-    readonly uploadedById: FieldRef<"Attachment", 'Int'>
+    readonly taskId: FieldRef<"Attachment", 'String'>
+    readonly uploadedById: FieldRef<"Attachment", 'String'>
   }
     
 
@@ -9624,30 +8799,6 @@ export namespace Prisma {
      * The data used to create many Attachments.
      */
     data: AttachmentCreateManyInput | AttachmentCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Attachment createManyAndReturn
-   */
-  export type AttachmentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Attachment
-     */
-    select?: AttachmentSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Attachment
-     */
-    omit?: AttachmentOmit<ExtArgs> | null
-    /**
-     * The data used to create many Attachments.
-     */
-    data: AttachmentCreateManyInput | AttachmentCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AttachmentIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -9692,36 +8843,6 @@ export namespace Prisma {
      * Limit how many Attachments to update.
      */
     limit?: number
-  }
-
-  /**
-   * Attachment updateManyAndReturn
-   */
-  export type AttachmentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Attachment
-     */
-    select?: AttachmentSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Attachment
-     */
-    omit?: AttachmentOmit<ExtArgs> | null
-    /**
-     * The data used to update Attachments.
-     */
-    data: XOR<AttachmentUpdateManyMutationInput, AttachmentUncheckedUpdateManyInput>
-    /**
-     * Filter which Attachments to update
-     */
-    where?: AttachmentWhereInput
-    /**
-     * Limit how many Attachments to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: AttachmentIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -9791,6 +8912,34 @@ export namespace Prisma {
   }
 
   /**
+   * Attachment findRaw
+   */
+  export type AttachmentFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Attachment aggregateRaw
+   */
+  export type AttachmentAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
    * Attachment without action
    */
   export type AttachmentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9815,36 +8964,22 @@ export namespace Prisma {
 
   export type AggregateComment = {
     _count: CommentCountAggregateOutputType | null
-    _avg: CommentAvgAggregateOutputType | null
-    _sum: CommentSumAggregateOutputType | null
     _min: CommentMinAggregateOutputType | null
     _max: CommentMaxAggregateOutputType | null
   }
 
-  export type CommentAvgAggregateOutputType = {
-    id: number | null
-    taskId: number | null
-    userId: number | null
-  }
-
-  export type CommentSumAggregateOutputType = {
-    id: number | null
-    taskId: number | null
-    userId: number | null
-  }
-
   export type CommentMinAggregateOutputType = {
-    id: number | null
+    id: string | null
     text: string | null
-    taskId: number | null
-    userId: number | null
+    taskId: string | null
+    userId: string | null
   }
 
   export type CommentMaxAggregateOutputType = {
-    id: number | null
+    id: string | null
     text: string | null
-    taskId: number | null
-    userId: number | null
+    taskId: string | null
+    userId: string | null
   }
 
   export type CommentCountAggregateOutputType = {
@@ -9855,18 +8990,6 @@ export namespace Prisma {
     _all: number
   }
 
-
-  export type CommentAvgAggregateInputType = {
-    id?: true
-    taskId?: true
-    userId?: true
-  }
-
-  export type CommentSumAggregateInputType = {
-    id?: true
-    taskId?: true
-    userId?: true
-  }
 
   export type CommentMinAggregateInputType = {
     id?: true
@@ -9928,18 +9051,6 @@ export namespace Prisma {
     /**
      * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
      * 
-     * Select which fields to average
-    **/
-    _avg?: CommentAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: CommentSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
      * Select which fields to find the minimum value
     **/
     _min?: CommentMinAggregateInputType
@@ -9970,20 +9081,16 @@ export namespace Prisma {
     take?: number
     skip?: number
     _count?: CommentCountAggregateInputType | true
-    _avg?: CommentAvgAggregateInputType
-    _sum?: CommentSumAggregateInputType
     _min?: CommentMinAggregateInputType
     _max?: CommentMaxAggregateInputType
   }
 
   export type CommentGroupByOutputType = {
-    id: number
+    id: string
     text: string
-    taskId: number
-    userId: number
+    taskId: string
+    userId: string
     _count: CommentCountAggregateOutputType | null
-    _avg: CommentAvgAggregateOutputType | null
-    _sum: CommentSumAggregateOutputType | null
     _min: CommentMinAggregateOutputType | null
     _max: CommentMaxAggregateOutputType | null
   }
@@ -10011,23 +9118,7 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["comment"]>
 
-  export type CommentSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    text?: boolean
-    taskId?: boolean
-    userId?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["comment"]>
 
-  export type CommentSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    text?: boolean
-    taskId?: boolean
-    userId?: boolean
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["comment"]>
 
   export type CommentSelectScalar = {
     id?: boolean
@@ -10041,14 +9132,6 @@ export namespace Prisma {
     task?: boolean | TaskDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }
-  export type CommentIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type CommentIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    task?: boolean | TaskDefaultArgs<ExtArgs>
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }
 
   export type $CommentPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Comment"
@@ -10057,10 +9140,10 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
-      id: number
+      id: string
       text: string
-      taskId: number
-      userId: number
+      taskId: string
+      userId: string
     }, ExtArgs["result"]["comment"]>
     composites: {}
   }
@@ -10179,30 +9262,6 @@ export namespace Prisma {
     createMany<T extends CommentCreateManyArgs>(args?: SelectSubset<T, CommentCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Create many Comments and returns the data saved in the database.
-     * @param {CommentCreateManyAndReturnArgs} args - Arguments to create many Comments.
-     * @example
-     * // Create many Comments
-     * const comment = await prisma.comment.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many Comments and only return the `id`
-     * const commentWithIdOnly = await prisma.comment.createManyAndReturn({
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends CommentCreateManyAndReturnArgs>(args?: SelectSubset<T, CommentCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Delete a Comment.
      * @param {CommentDeleteArgs} args - Arguments to delete one Comment.
      * @example
@@ -10267,36 +9326,6 @@ export namespace Prisma {
     updateMany<T extends CommentUpdateManyArgs>(args: SelectSubset<T, CommentUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
 
     /**
-     * Update zero or more Comments and returns the data updated in the database.
-     * @param {CommentUpdateManyAndReturnArgs} args - Arguments to update many Comments.
-     * @example
-     * // Update many Comments
-     * const comment = await prisma.comment.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Comments and only return the `id`
-     * const commentWithIdOnly = await prisma.comment.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends CommentUpdateManyAndReturnArgs>(args: SelectSubset<T, CommentUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
-
-    /**
      * Create or update one Comment.
      * @param {CommentUpsertArgs} args - Arguments to update or create a Comment.
      * @example
@@ -10314,6 +9343,29 @@ export namespace Prisma {
      * })
      */
     upsert<T extends CommentUpsertArgs>(args: SelectSubset<T, CommentUpsertArgs<ExtArgs>>): Prisma__CommentClient<$Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Comments that matches the filter.
+     * @param {CommentFindRawArgs} args - Select which filters you would like to apply.
+     * @example
+     * const comment = await prisma.comment.findRaw({
+     *   filter: { age: { $gt: 25 } }
+     * })
+     */
+    findRaw(args?: CommentFindRawArgs): Prisma.PrismaPromise<JsonObject>
+
+    /**
+     * Perform aggregation operations on a Comment.
+     * @param {CommentAggregateRawArgs} args - Select which aggregations you would like to apply.
+     * @example
+     * const comment = await prisma.comment.aggregateRaw({
+     *   pipeline: [
+     *     { $match: { status: "registered" } },
+     *     { $group: { _id: "$country", total: { $sum: 1 } } }
+     *   ]
+     * })
+     */
+    aggregateRaw(args?: CommentAggregateRawArgs): Prisma.PrismaPromise<JsonObject>
 
 
     /**
@@ -10486,10 +9538,10 @@ export namespace Prisma {
    * Fields of the Comment model
    */
   interface CommentFieldRefs {
-    readonly id: FieldRef<"Comment", 'Int'>
+    readonly id: FieldRef<"Comment", 'String'>
     readonly text: FieldRef<"Comment", 'String'>
-    readonly taskId: FieldRef<"Comment", 'Int'>
-    readonly userId: FieldRef<"Comment", 'Int'>
+    readonly taskId: FieldRef<"Comment", 'String'>
+    readonly userId: FieldRef<"Comment", 'String'>
   }
     
 
@@ -10719,30 +9771,6 @@ export namespace Prisma {
      * The data used to create many Comments.
      */
     data: CommentCreateManyInput | CommentCreateManyInput[]
-    skipDuplicates?: boolean
-  }
-
-  /**
-   * Comment createManyAndReturn
-   */
-  export type CommentCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Comment
-     */
-    select?: CommentSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Comment
-     */
-    omit?: CommentOmit<ExtArgs> | null
-    /**
-     * The data used to create many Comments.
-     */
-    data: CommentCreateManyInput | CommentCreateManyInput[]
-    skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommentIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -10787,36 +9815,6 @@ export namespace Prisma {
      * Limit how many Comments to update.
      */
     limit?: number
-  }
-
-  /**
-   * Comment updateManyAndReturn
-   */
-  export type CommentUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Comment
-     */
-    select?: CommentSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Comment
-     */
-    omit?: CommentOmit<ExtArgs> | null
-    /**
-     * The data used to update Comments.
-     */
-    data: XOR<CommentUpdateManyMutationInput, CommentUncheckedUpdateManyInput>
-    /**
-     * Filter which Comments to update
-     */
-    where?: CommentWhereInput
-    /**
-     * Limit how many Comments to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CommentIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -10886,6 +9884,34 @@ export namespace Prisma {
   }
 
   /**
+   * Comment findRaw
+   */
+  export type CommentFindRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The query predicate filter. If unspecified, then all documents in the collection will match the predicate. ${@link https://docs.mongodb.com/manual/reference/operator/query MongoDB Docs}.
+     */
+    filter?: InputJsonValue
+    /**
+     * Additional options to pass to the `find` command ${@link https://docs.mongodb.com/manual/reference/command/find/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
+   * Comment aggregateRaw
+   */
+  export type CommentAggregateRawArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * An array of aggregation stages to process and transform the document stream via the aggregation pipeline. ${@link https://docs.mongodb.com/manual/reference/operator/aggregation-pipeline MongoDB Docs}.
+     */
+    pipeline?: InputJsonValue[]
+    /**
+     * Additional options to pass to the `aggregate` command ${@link https://docs.mongodb.com/manual/reference/command/aggregate/#command-fields MongoDB Docs}.
+     */
+    options?: InputJsonValue
+  }
+
+  /**
    * Comment without action
    */
   export type CommentDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10908,18 +9934,8 @@ export namespace Prisma {
    * Enums
    */
 
-  export const TransactionIsolationLevel: {
-    ReadUncommitted: 'ReadUncommitted',
-    ReadCommitted: 'ReadCommitted',
-    RepeatableRead: 'RepeatableRead',
-    Serializable: 'Serializable'
-  };
-
-  export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
-
-
   export const UserScalarFieldEnum: {
-    userId: 'userId',
+    id: 'id',
     cognitoId: 'cognitoId',
     username: 'username',
     profilePictureUrl: 'profilePictureUrl',
@@ -11023,31 +10039,9 @@ export namespace Prisma {
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-  export const NullsOrder: {
-    first: 'first',
-    last: 'last'
-  };
-
-  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
   /**
    * Field references
    */
-
-
-  /**
-   * Reference to a field of type 'Int'
-   */
-  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
-    
-
-
-  /**
-   * Reference to a field of type 'Int[]'
-   */
-  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
 
 
   /**
@@ -11079,6 +10073,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Int'
+   */
+  export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+  /**
+   * Reference to a field of type 'Int[]'
+   */
+  export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Float'
    */
   export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
@@ -11099,11 +10107,11 @@ export namespace Prisma {
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
-    userId?: IntFilter<"User"> | number
+    id?: StringFilter<"User"> | string
     cognitoId?: StringFilter<"User"> | string
     username?: StringFilter<"User"> | string
     profilePictureUrl?: StringNullableFilter<"User"> | string | null
-    teamId?: IntNullableFilter<"User"> | number | null
+    teamId?: StringNullableFilter<"User"> | string | null
     authoredTasks?: TaskListRelationFilter
     assignedTasks?: TaskListRelationFilter
     taskAssignments?: TaskAssignmentListRelationFilter
@@ -11113,11 +10121,11 @@ export namespace Prisma {
   }
 
   export type UserOrderByWithRelationInput = {
-    userId?: SortOrder
+    id?: SortOrder
     cognitoId?: SortOrder
     username?: SortOrder
-    profilePictureUrl?: SortOrderInput | SortOrder
-    teamId?: SortOrderInput | SortOrder
+    profilePictureUrl?: SortOrder
+    teamId?: SortOrder
     authoredTasks?: TaskOrderByRelationAggregateInput
     assignedTasks?: TaskOrderByRelationAggregateInput
     taskAssignments?: TaskAssignmentOrderByRelationAggregateInput
@@ -11127,106 +10135,102 @@ export namespace Prisma {
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
-    userId?: number
+    id?: string
     cognitoId?: string
     username?: string
     AND?: UserWhereInput | UserWhereInput[]
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     profilePictureUrl?: StringNullableFilter<"User"> | string | null
-    teamId?: IntNullableFilter<"User"> | number | null
+    teamId?: StringNullableFilter<"User"> | string | null
     authoredTasks?: TaskListRelationFilter
     assignedTasks?: TaskListRelationFilter
     taskAssignments?: TaskAssignmentListRelationFilter
     attachments?: AttachmentListRelationFilter
     comments?: CommentListRelationFilter
     team?: XOR<TeamNullableScalarRelationFilter, TeamWhereInput> | null
-  }, "userId" | "cognitoId" | "username">
+  }, "id" | "cognitoId" | "username">
 
   export type UserOrderByWithAggregationInput = {
-    userId?: SortOrder
+    id?: SortOrder
     cognitoId?: SortOrder
     username?: SortOrder
-    profilePictureUrl?: SortOrderInput | SortOrder
-    teamId?: SortOrderInput | SortOrder
+    profilePictureUrl?: SortOrder
+    teamId?: SortOrder
     _count?: UserCountOrderByAggregateInput
-    _avg?: UserAvgOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
-    _sum?: UserSumOrderByAggregateInput
   }
 
   export type UserScalarWhereWithAggregatesInput = {
     AND?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
     OR?: UserScalarWhereWithAggregatesInput[]
     NOT?: UserScalarWhereWithAggregatesInput | UserScalarWhereWithAggregatesInput[]
-    userId?: IntWithAggregatesFilter<"User"> | number
+    id?: StringWithAggregatesFilter<"User"> | string
     cognitoId?: StringWithAggregatesFilter<"User"> | string
     username?: StringWithAggregatesFilter<"User"> | string
     profilePictureUrl?: StringNullableWithAggregatesFilter<"User"> | string | null
-    teamId?: IntNullableWithAggregatesFilter<"User"> | number | null
+    teamId?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type TeamWhereInput = {
     AND?: TeamWhereInput | TeamWhereInput[]
     OR?: TeamWhereInput[]
     NOT?: TeamWhereInput | TeamWhereInput[]
-    id?: IntFilter<"Team"> | number
+    id?: StringFilter<"Team"> | string
     teamName?: StringFilter<"Team"> | string
-    productOwnerUserId?: IntNullableFilter<"Team"> | number | null
-    projectManagerUserId?: IntNullableFilter<"Team"> | number | null
+    productOwnerUserId?: StringNullableFilter<"Team"> | string | null
+    projectManagerUserId?: StringNullableFilter<"Team"> | string | null
     projectTeams?: ProjectTeamListRelationFilter
-    user?: UserListRelationFilter
+    users?: UserListRelationFilter
   }
 
   export type TeamOrderByWithRelationInput = {
     id?: SortOrder
     teamName?: SortOrder
-    productOwnerUserId?: SortOrderInput | SortOrder
-    projectManagerUserId?: SortOrderInput | SortOrder
+    productOwnerUserId?: SortOrder
+    projectManagerUserId?: SortOrder
     projectTeams?: ProjectTeamOrderByRelationAggregateInput
-    user?: UserOrderByRelationAggregateInput
+    users?: UserOrderByRelationAggregateInput
   }
 
   export type TeamWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: TeamWhereInput | TeamWhereInput[]
     OR?: TeamWhereInput[]
     NOT?: TeamWhereInput | TeamWhereInput[]
     teamName?: StringFilter<"Team"> | string
-    productOwnerUserId?: IntNullableFilter<"Team"> | number | null
-    projectManagerUserId?: IntNullableFilter<"Team"> | number | null
+    productOwnerUserId?: StringNullableFilter<"Team"> | string | null
+    projectManagerUserId?: StringNullableFilter<"Team"> | string | null
     projectTeams?: ProjectTeamListRelationFilter
-    user?: UserListRelationFilter
+    users?: UserListRelationFilter
   }, "id">
 
   export type TeamOrderByWithAggregationInput = {
     id?: SortOrder
     teamName?: SortOrder
-    productOwnerUserId?: SortOrderInput | SortOrder
-    projectManagerUserId?: SortOrderInput | SortOrder
+    productOwnerUserId?: SortOrder
+    projectManagerUserId?: SortOrder
     _count?: TeamCountOrderByAggregateInput
-    _avg?: TeamAvgOrderByAggregateInput
     _max?: TeamMaxOrderByAggregateInput
     _min?: TeamMinOrderByAggregateInput
-    _sum?: TeamSumOrderByAggregateInput
   }
 
   export type TeamScalarWhereWithAggregatesInput = {
     AND?: TeamScalarWhereWithAggregatesInput | TeamScalarWhereWithAggregatesInput[]
     OR?: TeamScalarWhereWithAggregatesInput[]
     NOT?: TeamScalarWhereWithAggregatesInput | TeamScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Team"> | number
+    id?: StringWithAggregatesFilter<"Team"> | string
     teamName?: StringWithAggregatesFilter<"Team"> | string
-    productOwnerUserId?: IntNullableWithAggregatesFilter<"Team"> | number | null
-    projectManagerUserId?: IntNullableWithAggregatesFilter<"Team"> | number | null
+    productOwnerUserId?: StringNullableWithAggregatesFilter<"Team"> | string | null
+    projectManagerUserId?: StringNullableWithAggregatesFilter<"Team"> | string | null
   }
 
   export type ProjectWhereInput = {
     AND?: ProjectWhereInput | ProjectWhereInput[]
     OR?: ProjectWhereInput[]
     NOT?: ProjectWhereInput | ProjectWhereInput[]
-    id?: IntFilter<"Project"> | number
+    id?: StringFilter<"Project"> | string
     name?: StringFilter<"Project"> | string
     description?: StringNullableFilter<"Project"> | string | null
     startDate?: DateTimeNullableFilter<"Project"> | Date | string | null
@@ -11238,15 +10242,15 @@ export namespace Prisma {
   export type ProjectOrderByWithRelationInput = {
     id?: SortOrder
     name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    endDate?: SortOrderInput | SortOrder
+    description?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
     tasks?: TaskOrderByRelationAggregateInput
     projectTeams?: ProjectTeamOrderByRelationAggregateInput
   }
 
   export type ProjectWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: ProjectWhereInput | ProjectWhereInput[]
     OR?: ProjectWhereInput[]
     NOT?: ProjectWhereInput | ProjectWhereInput[]
@@ -11261,21 +10265,19 @@ export namespace Prisma {
   export type ProjectOrderByWithAggregationInput = {
     id?: SortOrder
     name?: SortOrder
-    description?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    endDate?: SortOrderInput | SortOrder
+    description?: SortOrder
+    startDate?: SortOrder
+    endDate?: SortOrder
     _count?: ProjectCountOrderByAggregateInput
-    _avg?: ProjectAvgOrderByAggregateInput
     _max?: ProjectMaxOrderByAggregateInput
     _min?: ProjectMinOrderByAggregateInput
-    _sum?: ProjectSumOrderByAggregateInput
   }
 
   export type ProjectScalarWhereWithAggregatesInput = {
     AND?: ProjectScalarWhereWithAggregatesInput | ProjectScalarWhereWithAggregatesInput[]
     OR?: ProjectScalarWhereWithAggregatesInput[]
     NOT?: ProjectScalarWhereWithAggregatesInput | ProjectScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Project"> | number
+    id?: StringWithAggregatesFilter<"Project"> | string
     name?: StringWithAggregatesFilter<"Project"> | string
     description?: StringNullableWithAggregatesFilter<"Project"> | string | null
     startDate?: DateTimeNullableWithAggregatesFilter<"Project"> | Date | string | null
@@ -11286,9 +10288,9 @@ export namespace Prisma {
     AND?: ProjectTeamWhereInput | ProjectTeamWhereInput[]
     OR?: ProjectTeamWhereInput[]
     NOT?: ProjectTeamWhereInput | ProjectTeamWhereInput[]
-    id?: IntFilter<"ProjectTeam"> | number
-    teamId?: IntFilter<"ProjectTeam"> | number
-    projectId?: IntFilter<"ProjectTeam"> | number
+    id?: StringFilter<"ProjectTeam"> | string
+    teamId?: StringFilter<"ProjectTeam"> | string
+    projectId?: StringFilter<"ProjectTeam"> | string
     team?: XOR<TeamScalarRelationFilter, TeamWhereInput>
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
   }
@@ -11302,12 +10304,12 @@ export namespace Prisma {
   }
 
   export type ProjectTeamWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: ProjectTeamWhereInput | ProjectTeamWhereInput[]
     OR?: ProjectTeamWhereInput[]
     NOT?: ProjectTeamWhereInput | ProjectTeamWhereInput[]
-    teamId?: IntFilter<"ProjectTeam"> | number
-    projectId?: IntFilter<"ProjectTeam"> | number
+    teamId?: StringFilter<"ProjectTeam"> | string
+    projectId?: StringFilter<"ProjectTeam"> | string
     team?: XOR<TeamScalarRelationFilter, TeamWhereInput>
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
   }, "id">
@@ -11317,26 +10319,24 @@ export namespace Prisma {
     teamId?: SortOrder
     projectId?: SortOrder
     _count?: ProjectTeamCountOrderByAggregateInput
-    _avg?: ProjectTeamAvgOrderByAggregateInput
     _max?: ProjectTeamMaxOrderByAggregateInput
     _min?: ProjectTeamMinOrderByAggregateInput
-    _sum?: ProjectTeamSumOrderByAggregateInput
   }
 
   export type ProjectTeamScalarWhereWithAggregatesInput = {
     AND?: ProjectTeamScalarWhereWithAggregatesInput | ProjectTeamScalarWhereWithAggregatesInput[]
     OR?: ProjectTeamScalarWhereWithAggregatesInput[]
     NOT?: ProjectTeamScalarWhereWithAggregatesInput | ProjectTeamScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"ProjectTeam"> | number
-    teamId?: IntWithAggregatesFilter<"ProjectTeam"> | number
-    projectId?: IntWithAggregatesFilter<"ProjectTeam"> | number
+    id?: StringWithAggregatesFilter<"ProjectTeam"> | string
+    teamId?: StringWithAggregatesFilter<"ProjectTeam"> | string
+    projectId?: StringWithAggregatesFilter<"ProjectTeam"> | string
   }
 
   export type TaskWhereInput = {
     AND?: TaskWhereInput | TaskWhereInput[]
     OR?: TaskWhereInput[]
     NOT?: TaskWhereInput | TaskWhereInput[]
-    id?: IntFilter<"Task"> | number
+    id?: StringFilter<"Task"> | string
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
     status?: StringNullableFilter<"Task"> | string | null
@@ -11345,9 +10345,9 @@ export namespace Prisma {
     startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     points?: IntNullableFilter<"Task"> | number | null
-    projectId?: IntFilter<"Task"> | number
-    authorUserId?: IntFilter<"Task"> | number
-    assignedUserId?: IntNullableFilter<"Task"> | number | null
+    projectId?: StringFilter<"Task"> | string
+    authorUserId?: StringFilter<"Task"> | string
+    assignedUserId?: StringNullableFilter<"Task"> | string | null
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
     author?: XOR<UserScalarRelationFilter, UserWhereInput>
     assignee?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -11359,16 +10359,16 @@ export namespace Prisma {
   export type TaskOrderByWithRelationInput = {
     id?: SortOrder
     title?: SortOrder
-    description?: SortOrderInput | SortOrder
-    status?: SortOrderInput | SortOrder
-    priority?: SortOrderInput | SortOrder
-    tags?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    dueDate?: SortOrderInput | SortOrder
-    points?: SortOrderInput | SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    priority?: SortOrder
+    tags?: SortOrder
+    startDate?: SortOrder
+    dueDate?: SortOrder
+    points?: SortOrder
     projectId?: SortOrder
     authorUserId?: SortOrder
-    assignedUserId?: SortOrderInput | SortOrder
+    assignedUserId?: SortOrder
     project?: ProjectOrderByWithRelationInput
     author?: UserOrderByWithRelationInput
     assignee?: UserOrderByWithRelationInput
@@ -11378,7 +10378,7 @@ export namespace Prisma {
   }
 
   export type TaskWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: TaskWhereInput | TaskWhereInput[]
     OR?: TaskWhereInput[]
     NOT?: TaskWhereInput | TaskWhereInput[]
@@ -11390,9 +10390,9 @@ export namespace Prisma {
     startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     points?: IntNullableFilter<"Task"> | number | null
-    projectId?: IntFilter<"Task"> | number
-    authorUserId?: IntFilter<"Task"> | number
-    assignedUserId?: IntNullableFilter<"Task"> | number | null
+    projectId?: StringFilter<"Task"> | string
+    authorUserId?: StringFilter<"Task"> | string
+    assignedUserId?: StringNullableFilter<"Task"> | string | null
     project?: XOR<ProjectScalarRelationFilter, ProjectWhereInput>
     author?: XOR<UserScalarRelationFilter, UserWhereInput>
     assignee?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
@@ -11404,16 +10404,16 @@ export namespace Prisma {
   export type TaskOrderByWithAggregationInput = {
     id?: SortOrder
     title?: SortOrder
-    description?: SortOrderInput | SortOrder
-    status?: SortOrderInput | SortOrder
-    priority?: SortOrderInput | SortOrder
-    tags?: SortOrderInput | SortOrder
-    startDate?: SortOrderInput | SortOrder
-    dueDate?: SortOrderInput | SortOrder
-    points?: SortOrderInput | SortOrder
+    description?: SortOrder
+    status?: SortOrder
+    priority?: SortOrder
+    tags?: SortOrder
+    startDate?: SortOrder
+    dueDate?: SortOrder
+    points?: SortOrder
     projectId?: SortOrder
     authorUserId?: SortOrder
-    assignedUserId?: SortOrderInput | SortOrder
+    assignedUserId?: SortOrder
     _count?: TaskCountOrderByAggregateInput
     _avg?: TaskAvgOrderByAggregateInput
     _max?: TaskMaxOrderByAggregateInput
@@ -11425,7 +10425,7 @@ export namespace Prisma {
     AND?: TaskScalarWhereWithAggregatesInput | TaskScalarWhereWithAggregatesInput[]
     OR?: TaskScalarWhereWithAggregatesInput[]
     NOT?: TaskScalarWhereWithAggregatesInput | TaskScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Task"> | number
+    id?: StringWithAggregatesFilter<"Task"> | string
     title?: StringWithAggregatesFilter<"Task"> | string
     description?: StringNullableWithAggregatesFilter<"Task"> | string | null
     status?: StringNullableWithAggregatesFilter<"Task"> | string | null
@@ -11434,18 +10434,18 @@ export namespace Prisma {
     startDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
     points?: IntNullableWithAggregatesFilter<"Task"> | number | null
-    projectId?: IntWithAggregatesFilter<"Task"> | number
-    authorUserId?: IntWithAggregatesFilter<"Task"> | number
-    assignedUserId?: IntNullableWithAggregatesFilter<"Task"> | number | null
+    projectId?: StringWithAggregatesFilter<"Task"> | string
+    authorUserId?: StringWithAggregatesFilter<"Task"> | string
+    assignedUserId?: StringNullableWithAggregatesFilter<"Task"> | string | null
   }
 
   export type TaskAssignmentWhereInput = {
     AND?: TaskAssignmentWhereInput | TaskAssignmentWhereInput[]
     OR?: TaskAssignmentWhereInput[]
     NOT?: TaskAssignmentWhereInput | TaskAssignmentWhereInput[]
-    id?: IntFilter<"TaskAssignment"> | number
-    userId?: IntFilter<"TaskAssignment"> | number
-    taskId?: IntFilter<"TaskAssignment"> | number
+    id?: StringFilter<"TaskAssignment"> | string
+    userId?: StringFilter<"TaskAssignment"> | string
+    taskId?: StringFilter<"TaskAssignment"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
   }
@@ -11459,12 +10459,12 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: TaskAssignmentWhereInput | TaskAssignmentWhereInput[]
     OR?: TaskAssignmentWhereInput[]
     NOT?: TaskAssignmentWhereInput | TaskAssignmentWhereInput[]
-    userId?: IntFilter<"TaskAssignment"> | number
-    taskId?: IntFilter<"TaskAssignment"> | number
+    userId?: StringFilter<"TaskAssignment"> | string
+    taskId?: StringFilter<"TaskAssignment"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
   }, "id">
@@ -11474,30 +10474,28 @@ export namespace Prisma {
     userId?: SortOrder
     taskId?: SortOrder
     _count?: TaskAssignmentCountOrderByAggregateInput
-    _avg?: TaskAssignmentAvgOrderByAggregateInput
     _max?: TaskAssignmentMaxOrderByAggregateInput
     _min?: TaskAssignmentMinOrderByAggregateInput
-    _sum?: TaskAssignmentSumOrderByAggregateInput
   }
 
   export type TaskAssignmentScalarWhereWithAggregatesInput = {
     AND?: TaskAssignmentScalarWhereWithAggregatesInput | TaskAssignmentScalarWhereWithAggregatesInput[]
     OR?: TaskAssignmentScalarWhereWithAggregatesInput[]
     NOT?: TaskAssignmentScalarWhereWithAggregatesInput | TaskAssignmentScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"TaskAssignment"> | number
-    userId?: IntWithAggregatesFilter<"TaskAssignment"> | number
-    taskId?: IntWithAggregatesFilter<"TaskAssignment"> | number
+    id?: StringWithAggregatesFilter<"TaskAssignment"> | string
+    userId?: StringWithAggregatesFilter<"TaskAssignment"> | string
+    taskId?: StringWithAggregatesFilter<"TaskAssignment"> | string
   }
 
   export type AttachmentWhereInput = {
     AND?: AttachmentWhereInput | AttachmentWhereInput[]
     OR?: AttachmentWhereInput[]
     NOT?: AttachmentWhereInput | AttachmentWhereInput[]
-    id?: IntFilter<"Attachment"> | number
+    id?: StringFilter<"Attachment"> | string
     fileURL?: StringFilter<"Attachment"> | string
     fileName?: StringNullableFilter<"Attachment"> | string | null
-    taskId?: IntFilter<"Attachment"> | number
-    uploadedById?: IntFilter<"Attachment"> | number
+    taskId?: StringFilter<"Attachment"> | string
+    uploadedById?: StringFilter<"Attachment"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     uploadedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -11505,7 +10503,7 @@ export namespace Prisma {
   export type AttachmentOrderByWithRelationInput = {
     id?: SortOrder
     fileURL?: SortOrder
-    fileName?: SortOrderInput | SortOrder
+    fileName?: SortOrder
     taskId?: SortOrder
     uploadedById?: SortOrder
     task?: TaskOrderByWithRelationInput
@@ -11513,14 +10511,14 @@ export namespace Prisma {
   }
 
   export type AttachmentWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: AttachmentWhereInput | AttachmentWhereInput[]
     OR?: AttachmentWhereInput[]
     NOT?: AttachmentWhereInput | AttachmentWhereInput[]
     fileURL?: StringFilter<"Attachment"> | string
     fileName?: StringNullableFilter<"Attachment"> | string | null
-    taskId?: IntFilter<"Attachment"> | number
-    uploadedById?: IntFilter<"Attachment"> | number
+    taskId?: StringFilter<"Attachment"> | string
+    uploadedById?: StringFilter<"Attachment"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     uploadedBy?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -11528,35 +10526,33 @@ export namespace Prisma {
   export type AttachmentOrderByWithAggregationInput = {
     id?: SortOrder
     fileURL?: SortOrder
-    fileName?: SortOrderInput | SortOrder
+    fileName?: SortOrder
     taskId?: SortOrder
     uploadedById?: SortOrder
     _count?: AttachmentCountOrderByAggregateInput
-    _avg?: AttachmentAvgOrderByAggregateInput
     _max?: AttachmentMaxOrderByAggregateInput
     _min?: AttachmentMinOrderByAggregateInput
-    _sum?: AttachmentSumOrderByAggregateInput
   }
 
   export type AttachmentScalarWhereWithAggregatesInput = {
     AND?: AttachmentScalarWhereWithAggregatesInput | AttachmentScalarWhereWithAggregatesInput[]
     OR?: AttachmentScalarWhereWithAggregatesInput[]
     NOT?: AttachmentScalarWhereWithAggregatesInput | AttachmentScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Attachment"> | number
+    id?: StringWithAggregatesFilter<"Attachment"> | string
     fileURL?: StringWithAggregatesFilter<"Attachment"> | string
     fileName?: StringNullableWithAggregatesFilter<"Attachment"> | string | null
-    taskId?: IntWithAggregatesFilter<"Attachment"> | number
-    uploadedById?: IntWithAggregatesFilter<"Attachment"> | number
+    taskId?: StringWithAggregatesFilter<"Attachment"> | string
+    uploadedById?: StringWithAggregatesFilter<"Attachment"> | string
   }
 
   export type CommentWhereInput = {
     AND?: CommentWhereInput | CommentWhereInput[]
     OR?: CommentWhereInput[]
     NOT?: CommentWhereInput | CommentWhereInput[]
-    id?: IntFilter<"Comment"> | number
+    id?: StringFilter<"Comment"> | string
     text?: StringFilter<"Comment"> | string
-    taskId?: IntFilter<"Comment"> | number
-    userId?: IntFilter<"Comment"> | number
+    taskId?: StringFilter<"Comment"> | string
+    userId?: StringFilter<"Comment"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -11571,13 +10567,13 @@ export namespace Prisma {
   }
 
   export type CommentWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
+    id?: string
     AND?: CommentWhereInput | CommentWhereInput[]
     OR?: CommentWhereInput[]
     NOT?: CommentWhereInput | CommentWhereInput[]
     text?: StringFilter<"Comment"> | string
-    taskId?: IntFilter<"Comment"> | number
-    userId?: IntFilter<"Comment"> | number
+    taskId?: StringFilter<"Comment"> | string
+    userId?: StringFilter<"Comment"> | string
     task?: XOR<TaskScalarRelationFilter, TaskWhereInput>
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -11588,23 +10584,22 @@ export namespace Prisma {
     taskId?: SortOrder
     userId?: SortOrder
     _count?: CommentCountOrderByAggregateInput
-    _avg?: CommentAvgOrderByAggregateInput
     _max?: CommentMaxOrderByAggregateInput
     _min?: CommentMinOrderByAggregateInput
-    _sum?: CommentSumOrderByAggregateInput
   }
 
   export type CommentScalarWhereWithAggregatesInput = {
     AND?: CommentScalarWhereWithAggregatesInput | CommentScalarWhereWithAggregatesInput[]
     OR?: CommentScalarWhereWithAggregatesInput[]
     NOT?: CommentScalarWhereWithAggregatesInput | CommentScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"Comment"> | number
+    id?: StringWithAggregatesFilter<"Comment"> | string
     text?: StringWithAggregatesFilter<"Comment"> | string
-    taskId?: IntWithAggregatesFilter<"Comment"> | number
-    userId?: IntWithAggregatesFilter<"Comment"> | number
+    taskId?: StringWithAggregatesFilter<"Comment"> | string
+    userId?: StringWithAggregatesFilter<"Comment"> | string
   }
 
   export type UserCreateInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -11613,15 +10608,15 @@ export namespace Prisma {
     taskAssignments?: TaskAssignmentCreateNestedManyWithoutUserInput
     attachments?: AttachmentCreateNestedManyWithoutUploadedByInput
     comments?: CommentCreateNestedManyWithoutUserInput
-    team?: TeamCreateNestedOneWithoutUserInput
+    team?: TeamCreateNestedOneWithoutUsersInput
   }
 
   export type UserUncheckedCreateInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
     authoredTasks?: TaskUncheckedCreateNestedManyWithoutAuthorInput
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutUserInput
@@ -11638,15 +10633,14 @@ export namespace Prisma {
     taskAssignments?: TaskAssignmentUpdateManyWithoutUserNestedInput
     attachments?: AttachmentUpdateManyWithoutUploadedByNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
-    team?: TeamUpdateOneWithoutUserNestedInput
+    team?: TeamUpdateOneWithoutUsersNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     authoredTasks?: TaskUncheckedUpdateManyWithoutAuthorNestedInput
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutUserNestedInput
@@ -11655,11 +10649,11 @@ export namespace Prisma {
   }
 
   export type UserCreateManyInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
@@ -11669,68 +10663,67 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateManyInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TeamCreateInput = {
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
     projectTeams?: ProjectTeamCreateNestedManyWithoutTeamInput
-    user?: UserCreateNestedManyWithoutTeamInput
+    users?: UserCreateNestedManyWithoutTeamInput
   }
 
   export type TeamUncheckedCreateInput = {
-    id?: number
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
     projectTeams?: ProjectTeamUncheckedCreateNestedManyWithoutTeamInput
-    user?: UserUncheckedCreateNestedManyWithoutTeamInput
+    users?: UserUncheckedCreateNestedManyWithoutTeamInput
   }
 
   export type TeamUpdateInput = {
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
     projectTeams?: ProjectTeamUpdateManyWithoutTeamNestedInput
-    user?: UserUpdateManyWithoutTeamNestedInput
+    users?: UserUpdateManyWithoutTeamNestedInput
   }
 
   export type TeamUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
     projectTeams?: ProjectTeamUncheckedUpdateManyWithoutTeamNestedInput
-    user?: UserUncheckedUpdateManyWithoutTeamNestedInput
+    users?: UserUncheckedUpdateManyWithoutTeamNestedInput
   }
 
   export type TeamCreateManyInput = {
-    id?: number
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
   }
 
   export type TeamUpdateManyMutationInput = {
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TeamUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProjectCreateInput = {
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -11740,7 +10733,7 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedCreateInput = {
-    id?: number
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -11759,7 +10752,6 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11769,7 +10761,7 @@ export namespace Prisma {
   }
 
   export type ProjectCreateManyInput = {
-    id?: number
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -11784,7 +10776,6 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -11792,14 +10783,15 @@ export namespace Prisma {
   }
 
   export type ProjectTeamCreateInput = {
+    id?: string
     team: TeamCreateNestedOneWithoutProjectTeamsInput
     project: ProjectCreateNestedOneWithoutProjectTeamsInput
   }
 
   export type ProjectTeamUncheckedCreateInput = {
-    id?: number
-    teamId: number
-    projectId: number
+    id?: string
+    teamId: string
+    projectId: string
   }
 
   export type ProjectTeamUpdateInput = {
@@ -11808,15 +10800,14 @@ export namespace Prisma {
   }
 
   export type ProjectTeamUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    teamId?: IntFieldUpdateOperationsInput | number
-    projectId?: IntFieldUpdateOperationsInput | number
+    teamId?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProjectTeamCreateManyInput = {
-    id?: number
-    teamId: number
-    projectId: number
+    id?: string
+    teamId: string
+    projectId: string
   }
 
   export type ProjectTeamUpdateManyMutationInput = {
@@ -11824,12 +10815,12 @@ export namespace Prisma {
   }
 
   export type ProjectTeamUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    teamId?: IntFieldUpdateOperationsInput | number
-    projectId?: IntFieldUpdateOperationsInput | number
+    teamId?: StringFieldUpdateOperationsInput | string
+    projectId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskCreateInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -11847,7 +10838,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -11856,9 +10847,9 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
-    assignedUserId?: number | null
+    projectId: string
+    authorUserId: string
+    assignedUserId?: string | null
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutTaskInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
@@ -11882,7 +10873,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11891,16 +10881,16 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateManyInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -11909,9 +10899,9 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
-    assignedUserId?: number | null
+    projectId: string
+    authorUserId: string
+    assignedUserId?: string | null
   }
 
   export type TaskUpdateManyMutationInput = {
@@ -11926,7 +10916,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -11935,20 +10924,21 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskAssignmentCreateInput = {
+    id?: string
     user: UserCreateNestedOneWithoutTaskAssignmentsInput
     task: TaskCreateNestedOneWithoutTaskAssignmentsInput
   }
 
   export type TaskAssignmentUncheckedCreateInput = {
-    id?: number
-    userId: number
-    taskId: number
+    id?: string
+    userId: string
+    taskId: string
   }
 
   export type TaskAssignmentUpdateInput = {
@@ -11957,15 +10947,14 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
-    taskId?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAssignmentCreateManyInput = {
-    id?: number
-    userId: number
-    taskId: number
+    id?: string
+    userId: string
+    taskId: string
   }
 
   export type TaskAssignmentUpdateManyMutationInput = {
@@ -11973,12 +10962,12 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
-    taskId?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttachmentCreateInput = {
+    id?: string
     fileURL: string
     fileName?: string | null
     task: TaskCreateNestedOneWithoutAttachmentsInput
@@ -11986,11 +10975,11 @@ export namespace Prisma {
   }
 
   export type AttachmentUncheckedCreateInput = {
-    id?: number
+    id?: string
     fileURL: string
     fileName?: string | null
-    taskId: number
-    uploadedById: number
+    taskId: string
+    uploadedById: string
   }
 
   export type AttachmentUpdateInput = {
@@ -12001,19 +10990,18 @@ export namespace Prisma {
   }
 
   export type AttachmentUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     fileURL?: StringFieldUpdateOperationsInput | string
     fileName?: NullableStringFieldUpdateOperationsInput | string | null
-    taskId?: IntFieldUpdateOperationsInput | number
-    uploadedById?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
+    uploadedById?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttachmentCreateManyInput = {
-    id?: number
+    id?: string
     fileURL: string
     fileName?: string | null
-    taskId: number
-    uploadedById: number
+    taskId: string
+    uploadedById: string
   }
 
   export type AttachmentUpdateManyMutationInput = {
@@ -12022,24 +11010,24 @@ export namespace Prisma {
   }
 
   export type AttachmentUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
     fileURL?: StringFieldUpdateOperationsInput | string
     fileName?: NullableStringFieldUpdateOperationsInput | string | null
-    taskId?: IntFieldUpdateOperationsInput | number
-    uploadedById?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
+    uploadedById?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentCreateInput = {
+    id?: string
     text: string
     task: TaskCreateNestedOneWithoutCommentsInput
     user: UserCreateNestedOneWithoutCommentsInput
   }
 
   export type CommentUncheckedCreateInput = {
-    id?: number
+    id?: string
     text: string
-    taskId: number
-    userId: number
+    taskId: string
+    userId: string
   }
 
   export type CommentUpdateInput = {
@@ -12049,17 +11037,16 @@ export namespace Prisma {
   }
 
   export type CommentUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
-    taskId?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentCreateManyInput = {
-    id?: number
+    id?: string
     text: string
-    taskId: number
-    userId: number
+    taskId: string
+    userId: string
   }
 
   export type CommentUpdateManyMutationInput = {
@@ -12067,21 +11054,9 @@ export namespace Prisma {
   }
 
   export type CommentUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
-    taskId?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
-  }
-
-  export type IntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
+    taskId?: StringFieldUpdateOperationsInput | string
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type StringFilter<$PrismaModel = never> = {
@@ -12112,17 +11087,7 @@ export namespace Prisma {
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     mode?: QueryMode
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    isSet?: boolean
   }
 
   export type TaskListRelationFilter = {
@@ -12154,11 +11119,6 @@ export namespace Prisma {
     isNot?: TeamWhereInput | null
   }
 
-  export type SortOrderInput = {
-    sort: SortOrder
-    nulls?: NullsOrder
-  }
-
   export type TaskOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
@@ -12176,20 +11136,15 @@ export namespace Prisma {
   }
 
   export type UserCountOrderByAggregateInput = {
-    userId?: SortOrder
+    id?: SortOrder
     cognitoId?: SortOrder
     username?: SortOrder
     profilePictureUrl?: SortOrder
     teamId?: SortOrder
   }
 
-  export type UserAvgOrderByAggregateInput = {
-    userId?: SortOrder
-    teamId?: SortOrder
-  }
-
   export type UserMaxOrderByAggregateInput = {
-    userId?: SortOrder
+    id?: SortOrder
     cognitoId?: SortOrder
     username?: SortOrder
     profilePictureUrl?: SortOrder
@@ -12197,32 +11152,11 @@ export namespace Prisma {
   }
 
   export type UserMinOrderByAggregateInput = {
-    userId?: SortOrder
+    id?: SortOrder
     cognitoId?: SortOrder
     username?: SortOrder
     profilePictureUrl?: SortOrder
     teamId?: SortOrder
-  }
-
-  export type UserSumOrderByAggregateInput = {
-    userId?: SortOrder
-    teamId?: SortOrder
-  }
-
-  export type IntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -12259,22 +11193,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type ProjectTeamListRelationFilter = {
@@ -12304,12 +11223,6 @@ export namespace Prisma {
     projectManagerUserId?: SortOrder
   }
 
-  export type TeamAvgOrderByAggregateInput = {
-    id?: SortOrder
-    productOwnerUserId?: SortOrder
-    projectManagerUserId?: SortOrder
-  }
-
   export type TeamMaxOrderByAggregateInput = {
     id?: SortOrder
     teamName?: SortOrder
@@ -12324,12 +11237,6 @@ export namespace Prisma {
     projectManagerUserId?: SortOrder
   }
 
-  export type TeamSumOrderByAggregateInput = {
-    id?: SortOrder
-    productOwnerUserId?: SortOrder
-    projectManagerUserId?: SortOrder
-  }
-
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -12339,6 +11246,7 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+    isSet?: boolean
   }
 
   export type ProjectCountOrderByAggregateInput = {
@@ -12347,10 +11255,6 @@ export namespace Prisma {
     description?: SortOrder
     startDate?: SortOrder
     endDate?: SortOrder
-  }
-
-  export type ProjectAvgOrderByAggregateInput = {
-    id?: SortOrder
   }
 
   export type ProjectMaxOrderByAggregateInput = {
@@ -12369,10 +11273,6 @@ export namespace Prisma {
     endDate?: SortOrder
   }
 
-  export type ProjectSumOrderByAggregateInput = {
-    id?: SortOrder
-  }
-
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -12385,6 +11285,7 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedDateTimeNullableFilter<$PrismaModel>
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type TeamScalarRelationFilter = {
@@ -12403,12 +11304,6 @@ export namespace Prisma {
     projectId?: SortOrder
   }
 
-  export type ProjectTeamAvgOrderByAggregateInput = {
-    id?: SortOrder
-    teamId?: SortOrder
-    projectId?: SortOrder
-  }
-
   export type ProjectTeamMaxOrderByAggregateInput = {
     id?: SortOrder
     teamId?: SortOrder
@@ -12421,10 +11316,16 @@ export namespace Prisma {
     projectId?: SortOrder
   }
 
-  export type ProjectTeamSumOrderByAggregateInput = {
-    id?: SortOrder
-    teamId?: SortOrder
-    projectId?: SortOrder
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    isSet?: boolean
   }
 
   export type UserScalarRelationFilter = {
@@ -12453,11 +11354,7 @@ export namespace Prisma {
   }
 
   export type TaskAvgOrderByAggregateInput = {
-    id?: SortOrder
     points?: SortOrder
-    projectId?: SortOrder
-    authorUserId?: SortOrder
-    assignedUserId?: SortOrder
   }
 
   export type TaskMaxOrderByAggregateInput = {
@@ -12491,11 +11388,24 @@ export namespace Prisma {
   }
 
   export type TaskSumOrderByAggregateInput = {
-    id?: SortOrder
     points?: SortOrder
-    projectId?: SortOrder
-    authorUserId?: SortOrder
-    assignedUserId?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type TaskScalarRelationFilter = {
@@ -12504,12 +11414,6 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentCountOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    taskId?: SortOrder
-  }
-
-  export type TaskAssignmentAvgOrderByAggregateInput = {
     id?: SortOrder
     userId?: SortOrder
     taskId?: SortOrder
@@ -12527,22 +11431,10 @@ export namespace Prisma {
     taskId?: SortOrder
   }
 
-  export type TaskAssignmentSumOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    taskId?: SortOrder
-  }
-
   export type AttachmentCountOrderByAggregateInput = {
     id?: SortOrder
     fileURL?: SortOrder
     fileName?: SortOrder
-    taskId?: SortOrder
-    uploadedById?: SortOrder
-  }
-
-  export type AttachmentAvgOrderByAggregateInput = {
-    id?: SortOrder
     taskId?: SortOrder
     uploadedById?: SortOrder
   }
@@ -12563,21 +11455,9 @@ export namespace Prisma {
     uploadedById?: SortOrder
   }
 
-  export type AttachmentSumOrderByAggregateInput = {
-    id?: SortOrder
-    taskId?: SortOrder
-    uploadedById?: SortOrder
-  }
-
   export type CommentCountOrderByAggregateInput = {
     id?: SortOrder
     text?: SortOrder
-    taskId?: SortOrder
-    userId?: SortOrder
-  }
-
-  export type CommentAvgOrderByAggregateInput = {
-    id?: SortOrder
     taskId?: SortOrder
     userId?: SortOrder
   }
@@ -12592,12 +11472,6 @@ export namespace Prisma {
   export type CommentMinOrderByAggregateInput = {
     id?: SortOrder
     text?: SortOrder
-    taskId?: SortOrder
-    userId?: SortOrder
-  }
-
-  export type CommentSumOrderByAggregateInput = {
-    id?: SortOrder
     taskId?: SortOrder
     userId?: SortOrder
   }
@@ -12637,9 +11511,9 @@ export namespace Prisma {
     connect?: CommentWhereUniqueInput | CommentWhereUniqueInput[]
   }
 
-  export type TeamCreateNestedOneWithoutUserInput = {
-    create?: XOR<TeamCreateWithoutUserInput, TeamUncheckedCreateWithoutUserInput>
-    connectOrCreate?: TeamCreateOrConnectWithoutUserInput
+  export type TeamCreateNestedOneWithoutUsersInput = {
+    create?: XOR<TeamCreateWithoutUsersInput, TeamUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: TeamCreateOrConnectWithoutUsersInput
     connect?: TeamWhereUniqueInput
   }
 
@@ -12684,6 +11558,7 @@ export namespace Prisma {
 
   export type NullableStringFieldUpdateOperationsInput = {
     set?: string | null
+    unset?: boolean
   }
 
   export type TaskUpdateManyWithoutAuthorNestedInput = {
@@ -12756,30 +11631,14 @@ export namespace Prisma {
     deleteMany?: CommentScalarWhereInput | CommentScalarWhereInput[]
   }
 
-  export type TeamUpdateOneWithoutUserNestedInput = {
-    create?: XOR<TeamCreateWithoutUserInput, TeamUncheckedCreateWithoutUserInput>
-    connectOrCreate?: TeamCreateOrConnectWithoutUserInput
-    upsert?: TeamUpsertWithoutUserInput
-    disconnect?: TeamWhereInput | boolean
+  export type TeamUpdateOneWithoutUsersNestedInput = {
+    create?: XOR<TeamCreateWithoutUsersInput, TeamUncheckedCreateWithoutUsersInput>
+    connectOrCreate?: TeamCreateOrConnectWithoutUsersInput
+    upsert?: TeamUpsertWithoutUsersInput
+    disconnect?: boolean
     delete?: TeamWhereInput | boolean
     connect?: TeamWhereUniqueInput
-    update?: XOR<XOR<TeamUpdateToOneWithWhereWithoutUserInput, TeamUpdateWithoutUserInput>, TeamUncheckedUpdateWithoutUserInput>
-  }
-
-  export type IntFieldUpdateOperationsInput = {
-    set?: number
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
+    update?: XOR<XOR<TeamUpdateToOneWithWhereWithoutUsersInput, TeamUpdateWithoutUsersInput>, TeamUncheckedUpdateWithoutUsersInput>
   }
 
   export type TaskUncheckedUpdateManyWithoutAuthorNestedInput = {
@@ -12966,6 +11825,7 @@ export namespace Prisma {
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
+    unset?: boolean
   }
 
   export type TaskUpdateManyWithoutProjectNestedInput = {
@@ -13112,6 +11972,15 @@ export namespace Prisma {
     connect?: CommentWhereUniqueInput | CommentWhereUniqueInput[]
   }
 
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+    unset?: boolean
+  }
+
   export type ProjectUpdateOneRequiredWithoutTasksNestedInput = {
     create?: XOR<ProjectCreateWithoutTasksInput, ProjectUncheckedCreateWithoutTasksInput>
     connectOrCreate?: ProjectCreateOrConnectWithoutTasksInput
@@ -13132,7 +12001,7 @@ export namespace Prisma {
     create?: XOR<UserCreateWithoutAssignedTasksInput, UserUncheckedCreateWithoutAssignedTasksInput>
     connectOrCreate?: UserCreateOrConnectWithoutAssignedTasksInput
     upsert?: UserUpsertWithoutAssignedTasksInput
-    disconnect?: UserWhereInput | boolean
+    disconnect?: boolean
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAssignedTasksInput, UserUpdateWithoutAssignedTasksInput>, UserUncheckedUpdateWithoutAssignedTasksInput>
@@ -13306,17 +12175,6 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCommentsInput, UserUpdateWithoutCommentsInput>, UserUncheckedUpdateWithoutCommentsInput>
   }
 
-  export type NestedIntFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntFilter<$PrismaModel> | number
-  }
-
   export type NestedStringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -13343,44 +12201,7 @@ export namespace Prisma {
     startsWith?: string | StringFieldRefInput<$PrismaModel>
     endsWith?: string | StringFieldRefInput<$PrismaModel>
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
-  }
-
-  export type NestedIntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel>
-    in?: number[] | ListIntFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntWithAggregatesFilter<$PrismaModel> | number
-    _count?: NestedIntFilter<$PrismaModel>
-    _avg?: NestedFloatFilter<$PrismaModel>
-    _sum?: NestedIntFilter<$PrismaModel>
-    _min?: NestedIntFilter<$PrismaModel>
-    _max?: NestedIntFilter<$PrismaModel>
-  }
-
-  export type NestedFloatFilter<$PrismaModel = never> = {
-    equals?: number | FloatFieldRefInput<$PrismaModel>
-    in?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    notIn?: number[] | ListFloatFieldRefInput<$PrismaModel>
-    lt?: number | FloatFieldRefInput<$PrismaModel>
-    lte?: number | FloatFieldRefInput<$PrismaModel>
-    gt?: number | FloatFieldRefInput<$PrismaModel>
-    gte?: number | FloatFieldRefInput<$PrismaModel>
-    not?: NestedFloatFilter<$PrismaModel> | number
+    isSet?: boolean
   }
 
   export type NestedStringWithAggregatesFilter<$PrismaModel = never> = {
@@ -13400,6 +12221,17 @@ export namespace Prisma {
     _max?: NestedStringFilter<$PrismaModel>
   }
 
+  export type NestedIntFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel>
+    in?: number[] | ListIntFieldRefInput<$PrismaModel>
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel>
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntFilter<$PrismaModel> | number
+  }
+
   export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel> | null
     in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -13415,6 +12247,46 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedStringNullableFilter<$PrismaModel>
     _max?: NestedStringNullableFilter<$PrismaModel>
+    isSet?: boolean
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+    isSet?: boolean
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+    isSet?: boolean
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -13431,6 +12303,7 @@ export namespace Prisma {
     _sum?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedIntNullableFilter<$PrismaModel>
     _max?: NestedIntNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type NestedFloatNullableFilter<$PrismaModel = never> = {
@@ -13442,34 +12315,11 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
-  }
-
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+    isSet?: boolean
   }
 
   export type TaskCreateWithoutAuthorInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -13486,7 +12336,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateWithoutAuthorInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -13495,8 +12345,8 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    assignedUserId?: number | null
+    projectId: string
+    assignedUserId?: string | null
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutTaskInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
@@ -13509,10 +12359,10 @@ export namespace Prisma {
 
   export type TaskCreateManyAuthorInputEnvelope = {
     data: TaskCreateManyAuthorInput | TaskCreateManyAuthorInput[]
-    skipDuplicates?: boolean
   }
 
   export type TaskCreateWithoutAssigneeInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -13529,7 +12379,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateWithoutAssigneeInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -13538,8 +12388,8 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
+    projectId: string
+    authorUserId: string
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutTaskInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
@@ -13552,16 +12402,16 @@ export namespace Prisma {
 
   export type TaskCreateManyAssigneeInputEnvelope = {
     data: TaskCreateManyAssigneeInput | TaskCreateManyAssigneeInput[]
-    skipDuplicates?: boolean
   }
 
   export type TaskAssignmentCreateWithoutUserInput = {
+    id?: string
     task: TaskCreateNestedOneWithoutTaskAssignmentsInput
   }
 
   export type TaskAssignmentUncheckedCreateWithoutUserInput = {
-    id?: number
-    taskId: number
+    id?: string
+    taskId: string
   }
 
   export type TaskAssignmentCreateOrConnectWithoutUserInput = {
@@ -13571,20 +12421,20 @@ export namespace Prisma {
 
   export type TaskAssignmentCreateManyUserInputEnvelope = {
     data: TaskAssignmentCreateManyUserInput | TaskAssignmentCreateManyUserInput[]
-    skipDuplicates?: boolean
   }
 
   export type AttachmentCreateWithoutUploadedByInput = {
+    id?: string
     fileURL: string
     fileName?: string | null
     task: TaskCreateNestedOneWithoutAttachmentsInput
   }
 
   export type AttachmentUncheckedCreateWithoutUploadedByInput = {
-    id?: number
+    id?: string
     fileURL: string
     fileName?: string | null
-    taskId: number
+    taskId: string
   }
 
   export type AttachmentCreateOrConnectWithoutUploadedByInput = {
@@ -13594,18 +12444,18 @@ export namespace Prisma {
 
   export type AttachmentCreateManyUploadedByInputEnvelope = {
     data: AttachmentCreateManyUploadedByInput | AttachmentCreateManyUploadedByInput[]
-    skipDuplicates?: boolean
   }
 
   export type CommentCreateWithoutUserInput = {
+    id?: string
     text: string
     task: TaskCreateNestedOneWithoutCommentsInput
   }
 
   export type CommentUncheckedCreateWithoutUserInput = {
-    id?: number
+    id?: string
     text: string
-    taskId: number
+    taskId: string
   }
 
   export type CommentCreateOrConnectWithoutUserInput = {
@@ -13615,27 +12465,27 @@ export namespace Prisma {
 
   export type CommentCreateManyUserInputEnvelope = {
     data: CommentCreateManyUserInput | CommentCreateManyUserInput[]
-    skipDuplicates?: boolean
   }
 
-  export type TeamCreateWithoutUserInput = {
+  export type TeamCreateWithoutUsersInput = {
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
     projectTeams?: ProjectTeamCreateNestedManyWithoutTeamInput
   }
 
-  export type TeamUncheckedCreateWithoutUserInput = {
-    id?: number
+  export type TeamUncheckedCreateWithoutUsersInput = {
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
     projectTeams?: ProjectTeamUncheckedCreateNestedManyWithoutTeamInput
   }
 
-  export type TeamCreateOrConnectWithoutUserInput = {
+  export type TeamCreateOrConnectWithoutUsersInput = {
     where: TeamWhereUniqueInput
-    create: XOR<TeamCreateWithoutUserInput, TeamUncheckedCreateWithoutUserInput>
+    create: XOR<TeamCreateWithoutUsersInput, TeamUncheckedCreateWithoutUsersInput>
   }
 
   export type TaskUpsertWithWhereUniqueWithoutAuthorInput = {
@@ -13658,7 +12508,7 @@ export namespace Prisma {
     AND?: TaskScalarWhereInput | TaskScalarWhereInput[]
     OR?: TaskScalarWhereInput[]
     NOT?: TaskScalarWhereInput | TaskScalarWhereInput[]
-    id?: IntFilter<"Task"> | number
+    id?: StringFilter<"Task"> | string
     title?: StringFilter<"Task"> | string
     description?: StringNullableFilter<"Task"> | string | null
     status?: StringNullableFilter<"Task"> | string | null
@@ -13667,9 +12517,9 @@ export namespace Prisma {
     startDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     dueDate?: DateTimeNullableFilter<"Task"> | Date | string | null
     points?: IntNullableFilter<"Task"> | number | null
-    projectId?: IntFilter<"Task"> | number
-    authorUserId?: IntFilter<"Task"> | number
-    assignedUserId?: IntNullableFilter<"Task"> | number | null
+    projectId?: StringFilter<"Task"> | string
+    authorUserId?: StringFilter<"Task"> | string
+    assignedUserId?: StringNullableFilter<"Task"> | string | null
   }
 
   export type TaskUpsertWithWhereUniqueWithoutAssigneeInput = {
@@ -13708,9 +12558,9 @@ export namespace Prisma {
     AND?: TaskAssignmentScalarWhereInput | TaskAssignmentScalarWhereInput[]
     OR?: TaskAssignmentScalarWhereInput[]
     NOT?: TaskAssignmentScalarWhereInput | TaskAssignmentScalarWhereInput[]
-    id?: IntFilter<"TaskAssignment"> | number
-    userId?: IntFilter<"TaskAssignment"> | number
-    taskId?: IntFilter<"TaskAssignment"> | number
+    id?: StringFilter<"TaskAssignment"> | string
+    userId?: StringFilter<"TaskAssignment"> | string
+    taskId?: StringFilter<"TaskAssignment"> | string
   }
 
   export type AttachmentUpsertWithWhereUniqueWithoutUploadedByInput = {
@@ -13733,11 +12583,11 @@ export namespace Prisma {
     AND?: AttachmentScalarWhereInput | AttachmentScalarWhereInput[]
     OR?: AttachmentScalarWhereInput[]
     NOT?: AttachmentScalarWhereInput | AttachmentScalarWhereInput[]
-    id?: IntFilter<"Attachment"> | number
+    id?: StringFilter<"Attachment"> | string
     fileURL?: StringFilter<"Attachment"> | string
     fileName?: StringNullableFilter<"Attachment"> | string | null
-    taskId?: IntFilter<"Attachment"> | number
-    uploadedById?: IntFilter<"Attachment"> | number
+    taskId?: StringFilter<"Attachment"> | string
+    uploadedById?: StringFilter<"Attachment"> | string
   }
 
   export type CommentUpsertWithWhereUniqueWithoutUserInput = {
@@ -13760,45 +12610,45 @@ export namespace Prisma {
     AND?: CommentScalarWhereInput | CommentScalarWhereInput[]
     OR?: CommentScalarWhereInput[]
     NOT?: CommentScalarWhereInput | CommentScalarWhereInput[]
-    id?: IntFilter<"Comment"> | number
+    id?: StringFilter<"Comment"> | string
     text?: StringFilter<"Comment"> | string
-    taskId?: IntFilter<"Comment"> | number
-    userId?: IntFilter<"Comment"> | number
+    taskId?: StringFilter<"Comment"> | string
+    userId?: StringFilter<"Comment"> | string
   }
 
-  export type TeamUpsertWithoutUserInput = {
-    update: XOR<TeamUpdateWithoutUserInput, TeamUncheckedUpdateWithoutUserInput>
-    create: XOR<TeamCreateWithoutUserInput, TeamUncheckedCreateWithoutUserInput>
+  export type TeamUpsertWithoutUsersInput = {
+    update: XOR<TeamUpdateWithoutUsersInput, TeamUncheckedUpdateWithoutUsersInput>
+    create: XOR<TeamCreateWithoutUsersInput, TeamUncheckedCreateWithoutUsersInput>
     where?: TeamWhereInput
   }
 
-  export type TeamUpdateToOneWithWhereWithoutUserInput = {
+  export type TeamUpdateToOneWithWhereWithoutUsersInput = {
     where?: TeamWhereInput
-    data: XOR<TeamUpdateWithoutUserInput, TeamUncheckedUpdateWithoutUserInput>
+    data: XOR<TeamUpdateWithoutUsersInput, TeamUncheckedUpdateWithoutUsersInput>
   }
 
-  export type TeamUpdateWithoutUserInput = {
+  export type TeamUpdateWithoutUsersInput = {
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
     projectTeams?: ProjectTeamUpdateManyWithoutTeamNestedInput
   }
 
-  export type TeamUncheckedUpdateWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
+  export type TeamUncheckedUpdateWithoutUsersInput = {
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
     projectTeams?: ProjectTeamUncheckedUpdateManyWithoutTeamNestedInput
   }
 
   export type ProjectTeamCreateWithoutTeamInput = {
+    id?: string
     project: ProjectCreateNestedOneWithoutProjectTeamsInput
   }
 
   export type ProjectTeamUncheckedCreateWithoutTeamInput = {
-    id?: number
-    projectId: number
+    id?: string
+    projectId: string
   }
 
   export type ProjectTeamCreateOrConnectWithoutTeamInput = {
@@ -13808,10 +12658,10 @@ export namespace Prisma {
 
   export type ProjectTeamCreateManyTeamInputEnvelope = {
     data: ProjectTeamCreateManyTeamInput | ProjectTeamCreateManyTeamInput[]
-    skipDuplicates?: boolean
   }
 
   export type UserCreateWithoutTeamInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -13823,7 +12673,7 @@ export namespace Prisma {
   }
 
   export type UserUncheckedCreateWithoutTeamInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -13841,7 +12691,6 @@ export namespace Prisma {
 
   export type UserCreateManyTeamInputEnvelope = {
     data: UserCreateManyTeamInput | UserCreateManyTeamInput[]
-    skipDuplicates?: boolean
   }
 
   export type ProjectTeamUpsertWithWhereUniqueWithoutTeamInput = {
@@ -13864,9 +12713,9 @@ export namespace Prisma {
     AND?: ProjectTeamScalarWhereInput | ProjectTeamScalarWhereInput[]
     OR?: ProjectTeamScalarWhereInput[]
     NOT?: ProjectTeamScalarWhereInput | ProjectTeamScalarWhereInput[]
-    id?: IntFilter<"ProjectTeam"> | number
-    teamId?: IntFilter<"ProjectTeam"> | number
-    projectId?: IntFilter<"ProjectTeam"> | number
+    id?: StringFilter<"ProjectTeam"> | string
+    teamId?: StringFilter<"ProjectTeam"> | string
+    projectId?: StringFilter<"ProjectTeam"> | string
   }
 
   export type UserUpsertWithWhereUniqueWithoutTeamInput = {
@@ -13889,14 +12738,15 @@ export namespace Prisma {
     AND?: UserScalarWhereInput | UserScalarWhereInput[]
     OR?: UserScalarWhereInput[]
     NOT?: UserScalarWhereInput | UserScalarWhereInput[]
-    userId?: IntFilter<"User"> | number
+    id?: StringFilter<"User"> | string
     cognitoId?: StringFilter<"User"> | string
     username?: StringFilter<"User"> | string
     profilePictureUrl?: StringNullableFilter<"User"> | string | null
-    teamId?: IntNullableFilter<"User"> | number | null
+    teamId?: StringNullableFilter<"User"> | string | null
   }
 
   export type TaskCreateWithoutProjectInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -13913,7 +12763,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateWithoutProjectInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -13922,8 +12772,8 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    authorUserId: number
-    assignedUserId?: number | null
+    authorUserId: string
+    assignedUserId?: string | null
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutTaskInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
@@ -13936,16 +12786,16 @@ export namespace Prisma {
 
   export type TaskCreateManyProjectInputEnvelope = {
     data: TaskCreateManyProjectInput | TaskCreateManyProjectInput[]
-    skipDuplicates?: boolean
   }
 
   export type ProjectTeamCreateWithoutProjectInput = {
+    id?: string
     team: TeamCreateNestedOneWithoutProjectTeamsInput
   }
 
   export type ProjectTeamUncheckedCreateWithoutProjectInput = {
-    id?: number
-    teamId: number
+    id?: string
+    teamId: string
   }
 
   export type ProjectTeamCreateOrConnectWithoutProjectInput = {
@@ -13955,7 +12805,6 @@ export namespace Prisma {
 
   export type ProjectTeamCreateManyProjectInputEnvelope = {
     data: ProjectTeamCreateManyProjectInput | ProjectTeamCreateManyProjectInput[]
-    skipDuplicates?: boolean
   }
 
   export type TaskUpsertWithWhereUniqueWithoutProjectInput = {
@@ -13991,18 +12840,19 @@ export namespace Prisma {
   }
 
   export type TeamCreateWithoutProjectTeamsInput = {
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
-    user?: UserCreateNestedManyWithoutTeamInput
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
+    users?: UserCreateNestedManyWithoutTeamInput
   }
 
   export type TeamUncheckedCreateWithoutProjectTeamsInput = {
-    id?: number
+    id?: string
     teamName: string
-    productOwnerUserId?: number | null
-    projectManagerUserId?: number | null
-    user?: UserUncheckedCreateNestedManyWithoutTeamInput
+    productOwnerUserId?: string | null
+    projectManagerUserId?: string | null
+    users?: UserUncheckedCreateNestedManyWithoutTeamInput
   }
 
   export type TeamCreateOrConnectWithoutProjectTeamsInput = {
@@ -14011,6 +12861,7 @@ export namespace Prisma {
   }
 
   export type ProjectCreateWithoutProjectTeamsInput = {
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -14019,7 +12870,7 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedCreateWithoutProjectTeamsInput = {
-    id?: number
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -14045,17 +12896,16 @@ export namespace Prisma {
 
   export type TeamUpdateWithoutProjectTeamsInput = {
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    user?: UserUpdateManyWithoutTeamNestedInput
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    users?: UserUpdateManyWithoutTeamNestedInput
   }
 
   export type TeamUncheckedUpdateWithoutProjectTeamsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     teamName?: StringFieldUpdateOperationsInput | string
-    productOwnerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    projectManagerUserId?: NullableIntFieldUpdateOperationsInput | number | null
-    user?: UserUncheckedUpdateManyWithoutTeamNestedInput
+    productOwnerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    projectManagerUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    users?: UserUncheckedUpdateManyWithoutTeamNestedInput
   }
 
   export type ProjectUpsertWithoutProjectTeamsInput = {
@@ -14078,7 +12928,6 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedUpdateWithoutProjectTeamsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14087,6 +12936,7 @@ export namespace Prisma {
   }
 
   export type ProjectCreateWithoutTasksInput = {
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -14095,7 +12945,7 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedCreateWithoutTasksInput = {
-    id?: number
+    id?: string
     name: string
     description?: string | null
     startDate?: Date | string | null
@@ -14109,6 +12959,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutAuthoredTasksInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -14116,15 +12967,15 @@ export namespace Prisma {
     taskAssignments?: TaskAssignmentCreateNestedManyWithoutUserInput
     attachments?: AttachmentCreateNestedManyWithoutUploadedByInput
     comments?: CommentCreateNestedManyWithoutUserInput
-    team?: TeamCreateNestedOneWithoutUserInput
+    team?: TeamCreateNestedOneWithoutUsersInput
   }
 
   export type UserUncheckedCreateWithoutAuthoredTasksInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutUserInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutUploadedByInput
@@ -14137,6 +12988,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutAssignedTasksInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -14144,15 +12996,15 @@ export namespace Prisma {
     taskAssignments?: TaskAssignmentCreateNestedManyWithoutUserInput
     attachments?: AttachmentCreateNestedManyWithoutUploadedByInput
     comments?: CommentCreateNestedManyWithoutUserInput
-    team?: TeamCreateNestedOneWithoutUserInput
+    team?: TeamCreateNestedOneWithoutUsersInput
   }
 
   export type UserUncheckedCreateWithoutAssignedTasksInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
     authoredTasks?: TaskUncheckedCreateNestedManyWithoutAuthorInput
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutUserInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutUploadedByInput
@@ -14165,12 +13017,13 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentCreateWithoutTaskInput = {
+    id?: string
     user: UserCreateNestedOneWithoutTaskAssignmentsInput
   }
 
   export type TaskAssignmentUncheckedCreateWithoutTaskInput = {
-    id?: number
-    userId: number
+    id?: string
+    userId: string
   }
 
   export type TaskAssignmentCreateOrConnectWithoutTaskInput = {
@@ -14180,20 +13033,20 @@ export namespace Prisma {
 
   export type TaskAssignmentCreateManyTaskInputEnvelope = {
     data: TaskAssignmentCreateManyTaskInput | TaskAssignmentCreateManyTaskInput[]
-    skipDuplicates?: boolean
   }
 
   export type AttachmentCreateWithoutTaskInput = {
+    id?: string
     fileURL: string
     fileName?: string | null
     uploadedBy: UserCreateNestedOneWithoutAttachmentsInput
   }
 
   export type AttachmentUncheckedCreateWithoutTaskInput = {
-    id?: number
+    id?: string
     fileURL: string
     fileName?: string | null
-    uploadedById: number
+    uploadedById: string
   }
 
   export type AttachmentCreateOrConnectWithoutTaskInput = {
@@ -14203,18 +13056,18 @@ export namespace Prisma {
 
   export type AttachmentCreateManyTaskInputEnvelope = {
     data: AttachmentCreateManyTaskInput | AttachmentCreateManyTaskInput[]
-    skipDuplicates?: boolean
   }
 
   export type CommentCreateWithoutTaskInput = {
+    id?: string
     text: string
     user: UserCreateNestedOneWithoutCommentsInput
   }
 
   export type CommentUncheckedCreateWithoutTaskInput = {
-    id?: number
+    id?: string
     text: string
-    userId: number
+    userId: string
   }
 
   export type CommentCreateOrConnectWithoutTaskInput = {
@@ -14224,7 +13077,6 @@ export namespace Prisma {
 
   export type CommentCreateManyTaskInputEnvelope = {
     data: CommentCreateManyTaskInput | CommentCreateManyTaskInput[]
-    skipDuplicates?: boolean
   }
 
   export type ProjectUpsertWithoutTasksInput = {
@@ -14247,7 +13099,6 @@ export namespace Prisma {
   }
 
   export type ProjectUncheckedUpdateWithoutTasksInput = {
-    id?: IntFieldUpdateOperationsInput | number
     name?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14274,15 +13125,14 @@ export namespace Prisma {
     taskAssignments?: TaskAssignmentUpdateManyWithoutUserNestedInput
     attachments?: AttachmentUpdateManyWithoutUploadedByNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
-    team?: TeamUpdateOneWithoutUserNestedInput
+    team?: TeamUpdateOneWithoutUsersNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAuthoredTasksInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutUserNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -14308,15 +13158,14 @@ export namespace Prisma {
     taskAssignments?: TaskAssignmentUpdateManyWithoutUserNestedInput
     attachments?: AttachmentUpdateManyWithoutUploadedByNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
-    team?: TeamUpdateOneWithoutUserNestedInput
+    team?: TeamUpdateOneWithoutUsersNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAssignedTasksInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     authoredTasks?: TaskUncheckedUpdateManyWithoutAuthorNestedInput
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutUserNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -14372,6 +13221,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutTaskAssignmentsInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -14379,15 +13229,15 @@ export namespace Prisma {
     assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     attachments?: AttachmentCreateNestedManyWithoutUploadedByInput
     comments?: CommentCreateNestedManyWithoutUserInput
-    team?: TeamCreateNestedOneWithoutUserInput
+    team?: TeamCreateNestedOneWithoutUsersInput
   }
 
   export type UserUncheckedCreateWithoutTaskAssignmentsInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
     authoredTasks?: TaskUncheckedCreateNestedManyWithoutAuthorInput
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutUploadedByInput
@@ -14400,6 +13250,7 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutTaskAssignmentsInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14416,7 +13267,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateWithoutTaskAssignmentsInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14425,9 +13276,9 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
-    assignedUserId?: number | null
+    projectId: string
+    authorUserId: string
+    assignedUserId?: string | null
     attachments?: AttachmentUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -14456,15 +13307,14 @@ export namespace Prisma {
     assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     attachments?: AttachmentUpdateManyWithoutUploadedByNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
-    team?: TeamUpdateOneWithoutUserNestedInput
+    team?: TeamUpdateOneWithoutUsersNestedInput
   }
 
   export type UserUncheckedUpdateWithoutTaskAssignmentsInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     authoredTasks?: TaskUncheckedUpdateManyWithoutAuthorNestedInput
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutUploadedByNestedInput
@@ -14499,7 +13349,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutTaskAssignmentsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14508,14 +13357,15 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
     attachments?: AttachmentUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskCreateWithoutAttachmentsInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14532,7 +13382,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateWithoutAttachmentsInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14541,9 +13391,9 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
-    assignedUserId?: number | null
+    projectId: string
+    authorUserId: string
+    assignedUserId?: string | null
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutTaskInput
     comments?: CommentUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -14554,6 +13404,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutAttachmentsInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -14561,15 +13412,15 @@ export namespace Prisma {
     assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     taskAssignments?: TaskAssignmentCreateNestedManyWithoutUserInput
     comments?: CommentCreateNestedManyWithoutUserInput
-    team?: TeamCreateNestedOneWithoutUserInput
+    team?: TeamCreateNestedOneWithoutUsersInput
   }
 
   export type UserUncheckedCreateWithoutAttachmentsInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
     authoredTasks?: TaskUncheckedCreateNestedManyWithoutAuthorInput
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutUserInput
@@ -14609,7 +13460,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutAttachmentsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14618,9 +13468,9 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -14644,15 +13494,14 @@ export namespace Prisma {
     assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     taskAssignments?: TaskAssignmentUpdateManyWithoutUserNestedInput
     comments?: CommentUpdateManyWithoutUserNestedInput
-    team?: TeamUpdateOneWithoutUserNestedInput
+    team?: TeamUpdateOneWithoutUsersNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAttachmentsInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     authoredTasks?: TaskUncheckedUpdateManyWithoutAuthorNestedInput
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutUserNestedInput
@@ -14660,6 +13509,7 @@ export namespace Prisma {
   }
 
   export type TaskCreateWithoutCommentsInput = {
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14676,7 +13526,7 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedCreateWithoutCommentsInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14685,9 +13535,9 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
-    assignedUserId?: number | null
+    projectId: string
+    authorUserId: string
+    assignedUserId?: string | null
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutTaskInput
     attachments?: AttachmentUncheckedCreateNestedManyWithoutTaskInput
   }
@@ -14698,6 +13548,7 @@ export namespace Prisma {
   }
 
   export type UserCreateWithoutCommentsInput = {
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -14705,15 +13556,15 @@ export namespace Prisma {
     assignedTasks?: TaskCreateNestedManyWithoutAssigneeInput
     taskAssignments?: TaskAssignmentCreateNestedManyWithoutUserInput
     attachments?: AttachmentCreateNestedManyWithoutUploadedByInput
-    team?: TeamCreateNestedOneWithoutUserInput
+    team?: TeamCreateNestedOneWithoutUsersInput
   }
 
   export type UserUncheckedCreateWithoutCommentsInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
-    teamId?: number | null
+    teamId?: string | null
     authoredTasks?: TaskUncheckedCreateNestedManyWithoutAuthorInput
     assignedTasks?: TaskUncheckedCreateNestedManyWithoutAssigneeInput
     taskAssignments?: TaskAssignmentUncheckedCreateNestedManyWithoutUserInput
@@ -14753,7 +13604,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutCommentsInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14762,9 +13612,9 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutTaskNestedInput
   }
@@ -14788,15 +13638,14 @@ export namespace Prisma {
     assignedTasks?: TaskUpdateManyWithoutAssigneeNestedInput
     taskAssignments?: TaskAssignmentUpdateManyWithoutUserNestedInput
     attachments?: AttachmentUpdateManyWithoutUploadedByNestedInput
-    team?: TeamUpdateOneWithoutUserNestedInput
+    team?: TeamUpdateOneWithoutUsersNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCommentsInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    teamId?: NullableIntFieldUpdateOperationsInput | number | null
+    teamId?: NullableStringFieldUpdateOperationsInput | string | null
     authoredTasks?: TaskUncheckedUpdateManyWithoutAuthorNestedInput
     assignedTasks?: TaskUncheckedUpdateManyWithoutAssigneeNestedInput
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutUserNestedInput
@@ -14804,7 +13653,7 @@ export namespace Prisma {
   }
 
   export type TaskCreateManyAuthorInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14813,12 +13662,12 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    assignedUserId?: number | null
+    projectId: string
+    assignedUserId?: string | null
   }
 
   export type TaskCreateManyAssigneeInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -14827,26 +13676,26 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    projectId: number
-    authorUserId: number
+    projectId: string
+    authorUserId: string
   }
 
   export type TaskAssignmentCreateManyUserInput = {
-    id?: number
-    taskId: number
+    id?: string
+    taskId: string
   }
 
   export type AttachmentCreateManyUploadedByInput = {
-    id?: number
+    id?: string
     fileURL: string
     fileName?: string | null
-    taskId: number
+    taskId: string
   }
 
   export type CommentCreateManyUserInput = {
-    id?: number
+    id?: string
     text: string
-    taskId: number
+    taskId: string
   }
 
   export type TaskUpdateWithoutAuthorInput = {
@@ -14866,7 +13715,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutAuthorInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14875,15 +13723,14 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutAuthorInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14892,8 +13739,8 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    projectId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskUpdateWithoutAssigneeInput = {
@@ -14913,7 +13760,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutAssigneeInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14922,15 +13768,14 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutAssigneeInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14939,8 +13784,8 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    projectId?: IntFieldUpdateOperationsInput | number
-    authorUserId?: IntFieldUpdateOperationsInput | number
+    projectId?: StringFieldUpdateOperationsInput | string
+    authorUserId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAssignmentUpdateWithoutUserInput = {
@@ -14948,13 +13793,11 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentUncheckedUpdateWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAssignmentUncheckedUpdateManyWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    taskId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttachmentUpdateWithoutUploadedByInput = {
@@ -14964,17 +13807,15 @@ export namespace Prisma {
   }
 
   export type AttachmentUncheckedUpdateWithoutUploadedByInput = {
-    id?: IntFieldUpdateOperationsInput | number
     fileURL?: StringFieldUpdateOperationsInput | string
     fileName?: NullableStringFieldUpdateOperationsInput | string | null
-    taskId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttachmentUncheckedUpdateManyWithoutUploadedByInput = {
-    id?: IntFieldUpdateOperationsInput | number
     fileURL?: StringFieldUpdateOperationsInput | string
     fileName?: NullableStringFieldUpdateOperationsInput | string | null
-    taskId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentUpdateWithoutUserInput = {
@@ -14983,24 +13824,22 @@ export namespace Prisma {
   }
 
   export type CommentUncheckedUpdateWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
-    taskId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentUncheckedUpdateManyWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
-    taskId?: IntFieldUpdateOperationsInput | number
+    taskId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProjectTeamCreateManyTeamInput = {
-    id?: number
-    projectId: number
+    id?: string
+    projectId: string
   }
 
   export type UserCreateManyTeamInput = {
-    userId?: number
+    id?: string
     cognitoId: string
     username: string
     profilePictureUrl?: string | null
@@ -15011,13 +13850,11 @@ export namespace Prisma {
   }
 
   export type ProjectTeamUncheckedUpdateWithoutTeamInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    projectId?: IntFieldUpdateOperationsInput | number
+    projectId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProjectTeamUncheckedUpdateManyWithoutTeamInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    projectId?: IntFieldUpdateOperationsInput | number
+    projectId?: StringFieldUpdateOperationsInput | string
   }
 
   export type UserUpdateWithoutTeamInput = {
@@ -15032,7 +13869,6 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateWithoutTeamInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15044,14 +13880,13 @@ export namespace Prisma {
   }
 
   export type UserUncheckedUpdateManyWithoutTeamInput = {
-    userId?: IntFieldUpdateOperationsInput | number
     cognitoId?: StringFieldUpdateOperationsInput | string
     username?: StringFieldUpdateOperationsInput | string
     profilePictureUrl?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type TaskCreateManyProjectInput = {
-    id?: number
+    id?: string
     title: string
     description?: string | null
     status?: string | null
@@ -15060,13 +13895,13 @@ export namespace Prisma {
     startDate?: Date | string | null
     dueDate?: Date | string | null
     points?: number | null
-    authorUserId: number
-    assignedUserId?: number | null
+    authorUserId: string
+    assignedUserId?: string | null
   }
 
   export type ProjectTeamCreateManyProjectInput = {
-    id?: number
-    teamId: number
+    id?: string
+    teamId: string
   }
 
   export type TaskUpdateWithoutProjectInput = {
@@ -15086,7 +13921,6 @@ export namespace Prisma {
   }
 
   export type TaskUncheckedUpdateWithoutProjectInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15095,15 +13929,14 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
     taskAssignments?: TaskAssignmentUncheckedUpdateManyWithoutTaskNestedInput
     attachments?: AttachmentUncheckedUpdateManyWithoutTaskNestedInput
     comments?: CommentUncheckedUpdateManyWithoutTaskNestedInput
   }
 
   export type TaskUncheckedUpdateManyWithoutProjectInput = {
-    id?: IntFieldUpdateOperationsInput | number
     title?: StringFieldUpdateOperationsInput | string
     description?: NullableStringFieldUpdateOperationsInput | string | null
     status?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15112,8 +13945,8 @@ export namespace Prisma {
     startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     dueDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     points?: NullableIntFieldUpdateOperationsInput | number | null
-    authorUserId?: IntFieldUpdateOperationsInput | number
-    assignedUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    authorUserId?: StringFieldUpdateOperationsInput | string
+    assignedUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type ProjectTeamUpdateWithoutProjectInput = {
@@ -15121,31 +13954,29 @@ export namespace Prisma {
   }
 
   export type ProjectTeamUncheckedUpdateWithoutProjectInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    teamId?: IntFieldUpdateOperationsInput | number
+    teamId?: StringFieldUpdateOperationsInput | string
   }
 
   export type ProjectTeamUncheckedUpdateManyWithoutProjectInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    teamId?: IntFieldUpdateOperationsInput | number
+    teamId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAssignmentCreateManyTaskInput = {
-    id?: number
-    userId: number
+    id?: string
+    userId: string
   }
 
   export type AttachmentCreateManyTaskInput = {
-    id?: number
+    id?: string
     fileURL: string
     fileName?: string | null
-    uploadedById: number
+    uploadedById: string
   }
 
   export type CommentCreateManyTaskInput = {
-    id?: number
+    id?: string
     text: string
-    userId: number
+    userId: string
   }
 
   export type TaskAssignmentUpdateWithoutTaskInput = {
@@ -15153,13 +13984,11 @@ export namespace Prisma {
   }
 
   export type TaskAssignmentUncheckedUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type TaskAssignmentUncheckedUpdateManyWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttachmentUpdateWithoutTaskInput = {
@@ -15169,17 +13998,15 @@ export namespace Prisma {
   }
 
   export type AttachmentUncheckedUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     fileURL?: StringFieldUpdateOperationsInput | string
     fileName?: NullableStringFieldUpdateOperationsInput | string | null
-    uploadedById?: IntFieldUpdateOperationsInput | number
+    uploadedById?: StringFieldUpdateOperationsInput | string
   }
 
   export type AttachmentUncheckedUpdateManyWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     fileURL?: StringFieldUpdateOperationsInput | string
     fileName?: NullableStringFieldUpdateOperationsInput | string | null
-    uploadedById?: IntFieldUpdateOperationsInput | number
+    uploadedById?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentUpdateWithoutTaskInput = {
@@ -15188,15 +14015,13 @@ export namespace Prisma {
   }
 
   export type CommentUncheckedUpdateWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
-    userId?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CommentUncheckedUpdateManyWithoutTaskInput = {
-    id?: IntFieldUpdateOperationsInput | number
     text?: StringFieldUpdateOperationsInput | string
-    userId?: IntFieldUpdateOperationsInput | number
+    userId?: StringFieldUpdateOperationsInput | string
   }
 
 
