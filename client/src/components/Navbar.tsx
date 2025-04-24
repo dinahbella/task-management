@@ -1,4 +1,4 @@
-import { MenuSquare, Moon, Search, Settings2, Sun } from "lucide-react";
+import { Menu, MenuSquare, Moon, Search, Settings2, Sun } from "lucide-react";
 import React from "react";
 import { Input } from "./ui/input";
 import Link from "next/link";
@@ -39,6 +39,15 @@ export default function Navbar() {
 
       {/* icons */}
       <div className="flex items-center gap-2">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => dispatch(setIsSidebarCollapsed(false))}
+          className="text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
+
         <Button
           variant="outline"
           size="icon"
