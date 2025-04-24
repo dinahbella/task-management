@@ -16,6 +16,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.6.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
     "mongoose": "^8.13.2",
     "prisma": "^6.6.0"
   }
