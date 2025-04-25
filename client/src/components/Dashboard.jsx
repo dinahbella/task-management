@@ -5,15 +5,15 @@ import {
   MdKeyboardArrowUp,
   MdKeyboardDoubleArrowUp,
 } from "react-icons/md";
-import { LuClipboardEdit } from "react-icons/lu";
 import { FaNewspaper, FaUsers } from "react-icons/fa";
 import { FaArrowsToDot } from "react-icons/fa6";
 import moment from "moment";
 import { summary } from "../assets/data";
 import clsx from "clsx";
-import { Chart } from "../components/Chart";
+import { Chart } from "@/components/Chart";
 import { BGS, PRIOTITYSTYELS, TASK_TYPE, getInitials } from "../utils";
-import UserInfo from "../components/UserInfo";
+import UserInfo from "@/components/UserInfo";
+import { ClipboardEdit } from "lucide-react";
 
 const TaskTable = ({ tasks }) => {
   const ICONS = {
@@ -167,7 +167,7 @@ const Dashboard = () => {
       _id: "3",
       label: "TASK IN PROGRESS ",
       total: totals["in progress"] || 0,
-      icon: <LuClipboardEdit />,
+      icon: <ClipboardEdit />,
       bg: "bg-[#f59e0b]",
     },
     {
