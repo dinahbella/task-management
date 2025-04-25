@@ -3,7 +3,7 @@ import moment from "moment";
 import Link from "next/link";
 import { Fragment, useState } from "react";
 import { BiSolidMessageRounded } from "react-icons/bi";
-import { HiBellAlert } from "react-icons/hi2";
+import { FaRegBell } from "react-icons/fa6";
 import { IoIosNotificationsOutline } from "react-icons/io";
 
 const data = [
@@ -43,7 +43,7 @@ const data = [
 ];
 const ICONS = {
   alert: (
-    <HiBellAlert className="h-5 w-5 text-gray-600 group-hover:text-indigo-600" />
+    <FaRegBell className="h-5 w-5 text-gray-600 group-hover:text-indigo-600" />
   ),
   message: (
     <BiSolidMessageRounded className="h-5 w-5 text-gray-600 group-hover:text-indigo-600" />

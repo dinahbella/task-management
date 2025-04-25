@@ -39,7 +39,7 @@ const linkData = [
     icon: <MdOutlinePendingActions />,
   },
   {
-    label: "To Do",
+    label: "ToDo",
     link: "/todo/todo",
     icon: <MdOutlinePendingActions />,
   },
