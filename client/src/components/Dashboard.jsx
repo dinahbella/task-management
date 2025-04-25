@@ -14,53 +14,53 @@ import { Chart } from "@/components/Chart";
 import { BGS, PRIOTITYSTYELS, TASK_TYPE, getInitials } from "../utils";
 import UserInfo from "@/components/UserInfo";
 import { ClipboardEdit } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TaskTable = ({ tasks }) => {
   const ICONS = {
-    high: <MdKeyboardDoubleArrowUp />,
-    medium: <MdKeyboardArrowUp />,
-    low: <MdKeyboardArrowDown />,
+    high: <MdKeyboardDoubleArrowUp className="text-lg" />,
+    medium: <MdKeyboardArrowUp className="text-lg" />,
+    low: <MdKeyboardArrowDown className="text-lg" />,
   };
 
   const TableHeader = () => (
-    <thead className="border-b border-gray-300 ">
-      <tr className="text-black text-left">
-        <th className="py-2">Task Title</th>
-        <th className="py-2">Priority</th>
-        <th className="py-2">Team</th>
-        <th className="py-2 hidden md:block">Created At</th>
+    <thead className="border-b border-gray-200">
+      <tr className="text-left text-sm font-medium text-gray-700">
+        <th className="py-3 px-2">Task Title</th>
+        <th className="py-3 px-2">Priority</th>
+        <th className="py-3 px-2">Team</th>
+        <th className="py-3 px-2 hidden md:table-cell">Created At</th>
       </tr>
     </thead>
   );
 
   const TableRow = ({ task }) => (
-    <tr className="border-b border-gray-300 text-gray-600 hover:bg-gray-300/10">
-      <td className="py-2">
+    <tr className="border-b border-gray-100 text-sm hover:bg-gray-50/50">
+      <td className="py-3 px-2">
         <div className="flex items-center gap-2">
           <div
-            className={clsx("w-4 h-4 rounded-full", TASK_TYPE[task.stage])}
+            className={clsx("w-3 h-3 rounded-full", TASK_TYPE[task.stage])}
           />
-
-          <p className="text-base text-black">{task.title}</p>
+          <p className="font-medium text-gray-900 line-clamp-1">{task.title}</p>
         </div>
       </td>
 
-      <td className="py-2">
-        <div className="flex gap-1 items-center">
-          <span className={clsx("text-lg", PRIOTITYSTYELS[task.priority])}>
+      <td className="py-3 px-2">
+        <div className="flex items-center gap-1">
+          <span className={clsx(PRIOTITYSTYELS[task.priority])}>
             {ICONS[task.priority]}
           </span>
-          <span className="capitalize">{task.priority}</span>
+          <span className="capitalize text-gray-600">{task.priority}</span>
         </div>
       </td>
 
-      <td className="py-2">
-        <div className="flex">
+      <td className="py-3 px-2">
+        <div className="flex -space-x-1">
           {task.team.map((m, index) => (
             <div
               key={index}
               className={clsx(
-                "w-7 h-7 rounded-full text-white flex items-center justify-center text-sm -mr-1",
+                "w-6 h-6 rounded-full text-white flex items-center justify-center text-xs border-2 border-white",
                 BGS[index % BGS.length]
               )}
             >
@@ -69,159 +69,179 @@ const TaskTable = ({ tasks }) => {
           ))}
         </div>
       </td>
-      <td className="py-2 hidden md:block">
-        <span className="text-base text-gray-600">
+
+      <td className="py-3 px-2 hidden md:table-cell">
+        <span className="text-gray-500 text-sm">
           {moment(task?.date).fromNow()}
         </span>
       </td>
     </tr>
   );
+
   return (
-    <>
-      <div className="w-full md:w-2/3 bg-white px-2 md:px-4 pt-4 pb-4 shadow-md rounded">
-        <table className="w-full">
-          <TableHeader />
-          <tbody>
-            {tasks?.map((task, id) => (
-              <TableRow key={id} task={task} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-lg">Recent Tasks</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <TableHeader />
+            <tbody>
+              {tasks?.map((task, id) => (
+                <TableRow key={id} task={task} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 
 const UserTable = ({ users }) => {
   const TableHeader = () => (
-    <thead className="border-b border-gray-300 ">
-      <tr className="text-black  text-left">
-        <th className="py-2">Full Name</th>
-        <th className="py-2">Status</th>
-        <th className="py-2">Created At</th>
+    <thead className="border-b border-gray-200">
+      <tr className="text-left text-sm font-medium text-gray-700">
+        <th className="py-3 px-2">User</th>
+        <th className="py-3 px-2">Status</th>
+        <th className="py-3 px-2 hidden sm:table-cell">Joined</th>
       </tr>
     </thead>
   );
 
   const TableRow = ({ user }) => (
-    <tr className="border-b border-gray-200  text-gray-600 hover:bg-gray-400/10">
-      <td className="py-2">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm bg-violet-700">
-            <span className="text-center">{getInitials(user?.name)}</span>
+    <tr className="border-b border-gray-100 text-sm hover:bg-gray-50/50">
+      <td className="py-3 px-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700">
+            <span className="text-sm font-medium">
+              {getInitials(user?.name)}
+            </span>
           </div>
-
           <div>
-            <p> {user.name}</p>
-            <span className="text-xs text-black">{user?.role}</span>
+            <p className="font-medium text-gray-900">{user.name}</p>
+            <span className="text-xs text-gray-500">{user?.role}</span>
           </div>
         </div>
       </td>
 
-      <td>
-        <p
+      <td className="py-3 px-2">
+        <span
           className={clsx(
-            "w-fit px-3 py-1 rounded-full text-sm",
-            user?.isActive ? "bg-blue-200" : "bg-yellow-100"
+            "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+            user?.isActive
+              ? "bg-blue-100 text-blue-800"
+              : "bg-yellow-100 text-yellow-800"
           )}
         >
           {user?.isActive ? "Active" : "Disabled"}
-        </p>
+        </span>
       </td>
-      <td className="py-2 text-sm">{moment(user?.createdAt).fromNow()}</td>
+
+      <td className="py-3 px-2 hidden sm:table-cell">
+        <span className="text-gray-500 text-sm">
+          {moment(user?.createdAt).fromNow()}
+        </span>
+      </td>
     </tr>
   );
 
   return (
-    <div className="w-full md:w-1/3 bg-white h-fit px-2 md:px-6 py-4 shadow-md rounded">
-      <table className="w-full mb-5">
-        <TableHeader />
-        <tbody>
-          {users?.map((user, index) => (
-            <TableRow key={index + user?._id} user={user} />
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="text-lg">Team Members</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <TableHeader />
+            <tbody>
+              {users?.map((user) => (
+                <TableRow key={user._id} user={user} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
+
 const Dashboard = () => {
   const totals = summary.tasks;
 
   const stats = [
     {
-      _id: "1",
-      label: "TOTAL TASK",
+      id: "1",
+      label: "TOTAL TASKS",
       total: summary?.totalTasks || 0,
-      icon: <FaNewspaper />,
-      bg: "bg-[#1d4ed8]",
+      icon: <FaNewspaper className="h-5 w-5" />,
+      color: "text-blue-600",
+      bg: "bg-blue-100",
     },
     {
-      _id: "2",
-      label: "COMPLTED TASK",
+      id: "2",
+      label: "COMPLETED",
       total: totals["completed"] || 0,
-      icon: <MdAdminPanelSettings />,
-      bg: "bg-[#0f766e]",
+      icon: <MdAdminPanelSettings className="h-5 w-5" />,
+      color: "text-teal-600",
+      bg: "bg-teal-100",
     },
     {
-      _id: "3",
-      label: "TASK IN PROGRESS ",
+      id: "3",
+      label: "IN PROGRESS",
       total: totals["in progress"] || 0,
-      icon: <ClipboardEdit />,
-      bg: "bg-[#f59e0b]",
+      icon: <ClipboardEdit className="h-5 w-5" />,
+      color: "text-amber-600",
+      bg: "bg-amber-100",
     },
     {
-      _id: "4",
-      label: "TODOS",
-      total: totals["todo"],
-      icon: <FaArrowsToDot />,
-      bg: "bg-[#be185d]" || 0,
+      id: "4",
+      label: "TO DO",
+      total: totals["todo"] || 0,
+      icon: <FaArrowsToDot className="h-5 w-5" />,
+      color: "text-rose-600",
+      bg: "bg-rose-100",
     },
   ];
 
-  const Card = ({ label, count, bg, icon }) => {
-    return (
-      <div className="w-full h-32 bg-white p-5 shadow-md rounded-md flex items-center justify-between">
-        <div className="h-full flex flex-1 flex-col justify-between">
-          <p className="text-base text-gray-600">{label}</p>
-          <span className="text-2xl font-semibold">{count}</span>
-          <span className="text-sm text-gray-400">{"110 last month"}</span>
-        </div>
-
-        <div
-          className={clsx(
-            "w-10 h-10 rounded-full flex items-center justify-center text-white",
-            bg
-          )}
-        >
-          {icon}
-        </div>
-      </div>
-    );
-  };
   return (
-    <div classNamee="h-full py-4">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-        {stats.map(({ icon, bg, label, total }, index) => (
-          <Card key={index} icon={icon} bg={bg} label={label} count={total} />
+    <div className="container py-4 space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map(({ icon, bg, color, label, total, id }) => (
+          <Card key={id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-500">{label}</p>
+                <h3 className="text-2xl font-bold">{total}</h3>
+                <p className="text-xs text-gray-400">{"110 last month"}</p>
+              </div>
+              <div className={clsx("p-3 rounded-full", bg, color)}>{icon}</div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      <div className="w-full bg-white my-16 p-4 rounded shadow-sm">
-        <h4 className="text-xl text-gray-600 font-semibold">
-          Chart by Priority
-        </h4>
-        <Chart />
-      </div>
+      {/* Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Tasks by Priority</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Chart />
+        </CardContent>
+      </Card>
 
-      <div className="w-full flex flex-col md:flex-row gap-4 2xl:gap-10 py-8">
-        {/* /left */}
-
-        <TaskTable tasks={summary.last10Task} />
-
-        {/* /right */}
-
-        <UserTable users={summary.users} />
+      {/* Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <TaskTable tasks={summary.last10Task} />
+        </div>
+        <div className="lg:col-span-1">
+          <UserTable users={summary.users} />
+        </div>
       </div>
     </div>
   );
