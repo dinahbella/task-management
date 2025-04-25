@@ -17,7 +17,7 @@ export const CustomInput = React.forwardRef(
           aria-invalid={error ? "true" : "false"}
           ref={ref}
           className={clsx(
-            "placeholder-gray-400 text-gray-900 outline-none text-base w-full py-2 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary",
+            "placeholder-gray-400 text-gray-900 outline-none text-base w-full py-1 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary",
             error && "border-red-500 focus:ring-red-300",
             className
           )}

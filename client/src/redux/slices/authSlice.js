@@ -1,9 +1,15 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const getInitialUser = () => {
+  if (typeof window !== "undefined") {
+    const storedUser = localStorage.getItem("userInfo");
+    return storedUser ? JSON.parse(storedUser) : null;
+  }
+  return null;
+};
+
 const initialState = {
-  user: localStorage.getItem("userInfo")
-    ? JSON.parse(localStorage.getItem("userInfo"))
-    : null,
+  user: getInitialUser(),
   isSidebarOpen: false,
 };
 
@@ -13,11 +19,15 @@ const authSlice = createSlice({
   reducers: {
     setCredentials: (state, action) => {
       state.user = action.payload;
-      localStorage.setItem("userInfo", JSON.stringify(action.payload));
+      if (typeof window !== "undefined") {
+        localStorage.setItem("userInfo", JSON.stringify(action.payload));
+      }
     },
     logOut: (state) => {
       state.user = null;
-      localStorage.removeItem("userInfo");
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("userInfo");
+      }
     },
     setOpenSidebar: (state) => {
       state.isSidebarOpen = !state.isSidebarOpen;
