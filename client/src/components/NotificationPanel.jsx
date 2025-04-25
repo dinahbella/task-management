@@ -1,6 +1,5 @@
 import { Popover, Transition } from "@headlessui/react";
 import moment from "moment";
-import Link from "next/link";
 import { Fragment, useState } from "react";
 import { BiSolidMessageRounded } from "react-icons/bi";
 import { FaRegBell } from "react-icons/fa6";
@@ -43,10 +42,10 @@ const data = [
 ];
 const ICONS = {
   alert: (
-    <FaRegBell className="h-5 w-5 text-gray-600 group-hover:text-indigo-600" />
+    <FaRegBell className="h-5 w-5 text-gray-600 group-hover:text-primary" />
   ),
   message: (
-    <BiSolidMessageRounded className="h-5 w-5 text-gray-600 group-hover:text-indigo-600" />
+    <BiSolidMessageRounded className="h-5 w-5 text-gray-600 group-hover:text-primary" />
   ),
 };
 
@@ -127,15 +126,15 @@ const NotificationPanel = () => {
 
                   <div className="grid grid-cols-2 divide-x bg-gray-50">
                     {callsToAction.map((item) => (
-                      <Link
+                      <a
                         key={item.name}
                         onClick={
                           item?.onClick ? () => item.onClick() : () => close()
                         }
-                        className="flex items-center justify-center gap-x-2.5 p-3 font-semibold text-blue-600 hover:bg-gray-100"
+                        className="flex items-center justify-center gap-x-2.5 p-3 font-semibold text-primary hover:bg-gray-100"
                       >
                         {item.name}
-                      </Link>
+                      </a>
                     ))}
                   </div>
                 </div>

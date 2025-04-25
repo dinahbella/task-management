@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5";
 import Sidebar from "@/components/Sidebar"; // adjust if needed
 import { Transition } from "@headlessui/react"; // install via `npm install @headlessui/react`
 import Navbar from "./Navbar";
+import { setOpenSidebar } from "@/redux/slices/authSlice";
 
 export default function Layout({ children }) {
   const { user, isSidebarOpen } = useSelector((state) => state.auth);
@@ -33,7 +34,9 @@ export default function Layout({ children }) {
       </div>
 
       {/* Mobile Sidebar */}
-
+      <div className="md:hidden">
+        <MobileSidebar />{" "}
+      </div>
       {/* Main Content */}
 
       <div className="flex-1 overflow-y-auto">
