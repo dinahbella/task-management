@@ -1,11 +1,11 @@
 import React from "react";
-import UserLayout from "@/components/UserLayout";
 import Dashboard from "@/components/Dashboard";
+import Layout from "@/components/UserLayout";
 
 export default function DashboardPage() {
   return (
-    // <UserLayout>
-    <Dashboard />
-    // </UserLayout>
+    <Layout>
+      <Dashboard />
+    </Layout>
   );
 }

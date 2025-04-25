@@ -16,7 +16,7 @@ export default function Login() {
     formState: { errors },
   } = useForm();
   const router = useRouter();
-  const { user } = useSelector((state) => state.auth); // Assuming you have a Redux store set up
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (user) {
@@ -27,7 +27,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (data) => {
-    console.log("Login data:", data);
+    console.log("Login data:", user);
   };
 
   // Motion animation configs
